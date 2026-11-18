@@ -1,0 +1,53 @@
+<%- include('../../layouts/admin') %>
+
+<!-- Contacts Table -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="p-4 border-b border-gray-200">
+        <h3 class="text-lg font-bold text-primary">رسائل التواصل</h3>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>الاسم</th>
+                    <th>البريد</th>
+                    <th>الموضوع</th>
+                    <th>الرسالة</th>
+                    <th>التاريخ</th>
+                    <th>التحكم</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% contacts.forEach(function(contact) { %>
+                    <tr>
+                        <td class="font-semibold text-sm"><%= contact.name %></td>
+                        <td class="text-gray-500 text-sm"><%= contact.email %></td>
+                        <td><%= contact.subject %></td>
+                        <td class="text-gray-600 text-sm max-w-xs truncate"><%= contact.message %></td>
+                        <td class="text-gray-400 text-sm"><%= new Date(contact.createdAt).toLocaleDateString('ar-SA') %></td>
+                        <td>
+                            <form action="/admin/contacts/<%= contact._id %>?_method=DELETE" method="POST" class="inline">
+                                <button type="submit" class="btn-danger text-xs confirm-delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }); %>
+                <% if (contacts.length === 0) { %>
+                    <tr>
+                        <td colspan="6" class="text-center text-gray-400 py-8">لا توجد رسائل</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+   </main>
+        </div>
+    </div>
+
+    <script src="/js/admin.js"></script>
+</body>
+</html>

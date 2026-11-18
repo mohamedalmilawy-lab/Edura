@@ -1,0 +1,89 @@
+<%- include('../../layouts/admin') %>
+
+<!-- Orders Table -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+        <h3 class="text-lg font-bold text-primary">إدارة الطلبات</h3>
+        <span class="text-gray-500 text-sm">إجمالي: <%= orders.length %> طلب</span>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>رقم الطلب</th>
+                    <th>العميل</th>
+                    <th>الكورسات</th>
+                    <th>السعر</th>
+                    <th>الحالة</th>
+                    <th>التاريخ</th>
+                    <th>التحكم</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% orders.forEach(function(order) { %>
+                    <tr>
+                        <td class="font-semibold text-primary"><%= order.orderNumber %></td>
+                        <td>
+                            <div>
+                                <p class="font-semibold text-sm"><%= order.user ? order.user.fullName : 'مجهول' %></p>
+                                <p class="text-xs text-gray-400"><%= order.user ? order.user.email : '' %></p>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="text-sm text-gray-600"><%= order.courses.length %> كورس</span>
+                        </td>
+                        <td class="font-bold text-accent"><%= order.totalPrice %> ل.س</td>
+                        <td>
+                            <span class="badge <%= order.status === 'confirmed' ? 'badge-available' : 'badge-unavailable' %>">
+                                <%= order.status === 'confirmed' ? 'مؤكد' : 'معلق' %>
+                            </span>
+                        </td>
+                        <td class="text-gray-400 text-sm"><%= new Date(order.createdAt).toLocaleDateString('ar-SA') %></td>
+                        <td>
+                            <div class="table-actions">
+                                <button data-order-id="<%= order._id %>" class="btn-primary text-xs">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <form action="/admin/orders/<%= order._id %>?_method=DELETE" method="POST" class="inline">
+                                    <button type="submit" class="btn-danger text-xs confirm-delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                <% }); %>
+                <% if (orders.length === 0) { %>
+                    <tr>
+                        <td colspan="7" class="text-center text-gray-400 py-8">لا توجد طلبات</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Order Detail Modal -->
+<div id="orderDetailModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="text-lg font-bold text-primary">تفاصيل الطلب</h3>
+            <button class="modal-close text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="orderDetailBody" class="modal-body">
+            <div class="flex justify-center py-8">
+                <div class="spinner"></div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-close btn-outline text-sm">إغلاق</button>
+        </div>
+    </div>
+</div>
+   </main>
+        </div>
+    </div>
+
+    <script src="/js/admin.js"></script>
+</body>
+</html>

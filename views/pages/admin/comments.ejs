@@ -1,0 +1,56 @@
+<%- include('../../layouts/admin') %>
+
+<!-- Comments Table -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="p-4 border-b border-gray-200">
+        <h3 class="text-lg font-bold text-primary">إدارة التعليقات</h3>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>المستخدم</th>
+                    <th>الكورس</th>
+                    <th>التعليق</th>
+                    <th>التاريخ</th>
+                    <th>التحكم</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% comments.forEach(function(comment) { %>
+                    <tr>
+                        <td class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
+                                <%= comment.user.fullName.charAt(0) %>
+                            </div>
+                            <span class="font-semibold text-sm"><%= comment.user.fullName %></span>
+                        </td>
+                        <td><%= comment.course ? comment.course.title : 'محذوف' %></td>
+                        <td class="text-gray-600 text-sm max-w-md truncate"><%= comment.text %></td>
+                        <td class="text-gray-400 text-sm"><%= new Date(comment.createdAt).toLocaleDateString('ar-SA') %></td>
+                        <td>
+                            <form action="/admin/comments/<%= comment._id %>?_method=DELETE" method="POST" class="inline">
+                                <button type="submit" class="btn-danger text-xs confirm-delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }); %>
+                <% if (comments.length === 0) { %>
+                    <tr>
+                        <td colspan="5" class="text-center text-gray-400 py-8">لا توجد تعليقات</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+   </main>
+        </div>
+    </div>
+
+    <script src="/js/admin.js"></script>
+</body>
+</html>

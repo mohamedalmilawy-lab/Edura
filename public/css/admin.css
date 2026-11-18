@@ -1,0 +1,90 @@
+/* Admin & Teacher Dashboard Styles */
+
+/* Sidebar */
+#adminSidebar,
+#teacherSidebar {
+    min-height: 100vh;
+}
+
+@media (max-width: 1023px) {
+    #adminSidebar,
+    #teacherSidebar {
+        transform: translateX(100%);
+    }
+
+    #adminSidebar.translate-x-0,
+    #teacherSidebar.translate-x-0 {
+        transform: translateX(0);
+    }
+}
+
+/* Table Actions */
+.table-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.table-actions button {
+    padding: 0.375rem 0.625rem;
+    font-size: 0.8rem;
+}
+
+/* Modal Form */
+.modal-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e5e7eb;
+    background: #f8fafc;
+}
+
+/* Search Bar */
+.search-bar {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.search-bar .form-input {
+    flex: 1;
+    min-width: 200px;
+}
+
+/* Chart Container */
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+/* Responsive table */
+@media (max-width: 768px) {
+    .data-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    .search-bar .form-input {
+        width: 100%;
+    }
+}

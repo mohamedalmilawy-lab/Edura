@@ -1,0 +1,40 @@
+<div id="flashContainer" class="fixed top-20 left-4 z-50 space-y-3 max-w-sm">
+
+    <% if (success_msg) { %>
+        <div class="rounded-2xl border-r-4 border-green-500 bg-green-50 p-4 shadow-sm text-right text-green-800">
+            <div class="flex items-start gap-3">
+                <div class="text-2xl leading-none mt-0.5"><i class="fas fa-check-circle"></i></div>
+                <div>
+                    <p class="font-semibold">نجاح</p>
+                    <p class="text-sm leading-relaxed mt-1"><%= success_msg %></p>
+                </div>
+            </div>
+        </div>
+    <% } %>
+
+    <% if (error_msg) { %>
+        <div class="rounded-2xl border-r-4 border-red-500 bg-red-50 p-4 shadow-sm text-right text-red-800">
+            <div class="flex items-start gap-3">
+                <div class="text-2xl leading-none mt-0.5"><i class="fas fa-exclamation-circle"></i></div>
+                <div>
+                    <p class="font-semibold">خطأ</p>
+                    <p class="text-sm leading-relaxed mt-1"><%= error_msg %></p>
+                </div>
+            </div>
+        </div>
+    <% } %>
+
+    <% if (info_msg) { %>
+        <div class="rounded-2xl border-r-4 border-blue-500 bg-blue-50 p-4 shadow-sm text-right text-blue-800">
+            <div class="flex items-start gap-3">
+                <div class="text-2xl leading-none mt-0.5"><i class="fas fa-info-circle"></i></div>
+                <div>
+                    <p class="font-semibold">معلومة</p>
+                    <p class="text-sm leading-relaxed mt-1"><%= info_msg %></p>
+                </div>
+            </div>
+        </div>
+    <% } %>
+</div>
+
+<div id="toastContainer" class="fixed bottom-4 left-4 z-50 space-y-3 max-w-sm"></div>

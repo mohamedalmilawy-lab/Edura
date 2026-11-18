@@ -1,0 +1,178 @@
+<%- include('../../layouts/admin') %>
+
+<!-- Search & Actions -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+        <form action="/admin/users" method="GET" class="flex flex-wrap gap-3 flex-1">
+            <input type="text" name="search" value="<%= search %>" placeholder="بحث بالاسم أو البريد..." class="form-input flex-1 min-w-[200px]">
+            <button type="submit" class="btn-primary"><i class="fas fa-search"></i></button>
+        </form>
+        <button data-modal="addUserModal" class="btn-success">
+            <i class="fas fa-plus"></i> إضافة مستخدم
+        </button>
+    </div>
+    <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+        <div class="bg-red-50 border-r-4 border-red-500 p-4 rounded mt-4">
+            <% errors.forEach(function(error) { %>
+                <p class="text-red-700 text-sm"><%= error %></p>
+            <% }); %>
+        </div>
+    <% } %>
+</div>
+
+<!-- Stats -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white rounded-lg p-4 text-center shadow-sm border border-gray-200">
+        <p class="text-2xl font-bold text-primary"><%= stats.total %></p>
+        <p class="text-gray-500 text-sm">الإجمالي</p>
+    </div>
+    <div class="bg-white rounded-lg p-4 text-center shadow-sm border border-gray-200">
+        <p class="text-2xl font-bold text-green-600"><%= stats.students %></p>
+        <p class="text-gray-500 text-sm">طلاب</p>
+    </div>
+    <div class="bg-white rounded-lg p-4 text-center shadow-sm border border-gray-200">
+        <p class="text-2xl font-bold text-blue-600"><%= stats.teachers %></p>
+        <p class="text-gray-500 text-sm">مدرسون</p>
+    </div>
+    <div class="bg-white rounded-lg p-4 text-center shadow-sm border border-gray-200">
+        <p class="text-2xl font-bold text-red-600"><%= stats.admins %></p>
+        <p class="text-gray-500 text-sm">مدراء</p>
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>المستخدم</th>
+                    <th>البريد</th>
+                    <th>الدور</th>
+                    <th>المحفظة</th>
+                    <th>الانضمام</th>
+                    <th>التحكم</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% users.forEach(function(u) { %>
+                    <tr>
+                        <td class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
+                                <%= u.fullName.charAt(0) %>
+                            </div>
+                            <span class="font-semibold text-sm"><%= u.fullName %></span>
+                        </td>
+                        <td class="text-gray-500 text-sm"><%= u.email %></td>
+                        <td>
+                            <select class="role-select form-input text-sm py-1" data-user-id="<%= u._id %>">
+                                <option value="student" <%= u.role === 'student' ? 'selected' : '' %>>طالب</option>
+                                <option value="teacher" <%= u.role === 'teacher' ? 'selected' : '' %>>مدرس</option>
+                                <option value="admin" <%= u.role === 'admin' ? 'selected' : '' %>>مدير</option>
+                            </select>
+                        </td>
+                        <td class="font-bold text-accent"><%= u.walletBalance %> ل.س</td>
+                        <td class="text-gray-400 text-sm"><%= new Date(u.joinedAt).toLocaleDateString('ar-SA') %></td>
+                        <td>
+                            <div class="table-actions">
+                                <button class="recharge-btn btn-success text-xs" data-user-id="<%= u._id %>" data-user-name="<%= u.fullName %>">
+                                    <i class="fas fa-plus-circle"></i> شحن
+                                </button>
+                                <form action="/admin/users/<%= u._id %>?_method=DELETE" method="POST" class="inline">
+                                    <button type="submit" class="btn-danger text-xs confirm-delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                <% }); %>
+                <% if (users.length === 0) { %>
+                    <tr>
+                        <td colspan="6" class="text-center text-gray-400 py-8">لا يوجد مستخدمون</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add User Modal -->
+<div id="addUserModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="text-lg font-bold text-primary">إضافة مستخدم جديد</h3>
+            <button class="modal-close text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+        </div>
+        <form action="/admin/users" method="POST" class="modal-form">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">الاسم الكامل</label>
+                    <input type="text" name="fullName" class="form-input"  value="<%= typeof oldData !== 'undefined' && oldData.fullName ? oldData.fullName : '' %>">
+                    <% if (errorFields && errorFields.fullName) { %>
+                        <p class="text-red-600 text-sm mt-2"><%= errorFields.fullName %></p>
+                    <% } %>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">البريد الإلكتروني</label>
+                    <input type="email" name="email" class="form-input"  value="<%= typeof oldData !== 'undefined' && oldData.email ? oldData.email : '' %>">
+                    <% if (errorFields && errorFields.email) { %>
+                        <p class="text-red-600 text-sm mt-2"><%= errorFields.email %></p>
+                    <% } %>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">كلمة السر</label>
+                    <input type="password" name="password" class="form-input"  minlength="8">
+                    <% if (errorFields && errorFields.password) { %>
+                        <p class="text-red-600 text-sm mt-2"><%= errorFields.password %></p>
+                    <% } %>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الدور</label>
+                    <select name="role" class="form-input">
+                        <option value="student" <%= typeof oldData !== 'undefined' && oldData.role === 'student' ? 'selected' : '' %>>طالب</option>
+                        <option value="teacher" <%= typeof oldData !== 'undefined' && oldData.role === 'teacher' ? 'selected' : '' %>>مدرس</option>
+                        <option value="admin" <%= typeof oldData !== 'undefined' && oldData.role === 'admin' ? 'selected' : '' %>>مدير</option>
+                    </select>
+                    <% if (errorFields && errorFields.role) { %>
+                        <p class="text-red-600 text-sm mt-2"><%= errorFields.role %></p>
+                    <% } %>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-close btn-outline text-sm">إلغاء</button>
+                <button type="submit" class="btn-success text-sm"><i class="fas fa-plus"></i> إضافة</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Recharge Wallet Modal -->
+<div id="rechargeModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="text-lg font-bold text-primary">شحن المحفظة</h3>
+            <button class="modal-close text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+        </div>
+        <form id="rechargeForm" class="modal-form">
+            <div class="modal-body">
+                <p class="text-sm text-gray-600 mb-3">المستخدم: <span id="rechargeUserName" class="font-bold"></span></p>
+                <div class="form-group">
+                    <label class="form-label">المبلغ (ل.س)</label>
+                    <input type="number" name="amount" id="rechargeAmount" class="form-input" min="1" step="any" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-close btn-outline text-sm">إلغاء</button>
+                <button type="submit" class="btn-success text-sm"><i class="fas fa-plus-circle"></i> شحن</button>
+            </div>
+        </form>
+    </div>
+</div>
+   </main>
+        </div>
+    </div>
+
+    <script src="/js/admin.js"></script>
+</body>
+</html>

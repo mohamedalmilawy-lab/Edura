@@ -1,0 +1,140 @@
+<%- include('../../layouts/admin') %>
+
+<!-- Actions -->
+<div class="flex justify-between items-center mb-6">
+    <h3 class="text-lg font-bold text-primary">إدارة التصنيفات</h3>
+    <button data-modal="addCategoryModal" class="btn-success">
+        <i class="fas fa-plus"></i> إضافة تصنيف
+    </button>
+</div>
+<% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+    <div class="bg-red-50 border-r-4 border-red-500 p-4 rounded mb-6">
+        <% errors.forEach(function(error) { %>
+            <p class="text-red-700 text-sm"><%= error %></p>
+        <% }); %>
+    </div>
+<% } %>
+
+<!-- Categories Table -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>الاسم</th>
+                    <th>الوصف</th>
+                    <th>الأيقونة</th>
+                    <th>التاريخ</th>
+                    <th>التحكم</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% categories.forEach(function(cat) { %>
+                    <tr>
+                        <td class="font-semibold"><%= cat.name %></td>
+                        <td class="text-gray-500 text-sm max-w-xs truncate"><%= cat.description || '-' %></td>
+                        <td><i class="fas <%= cat.icon || 'fa-layer-group' %> text-primary"></i></td>
+                        <td class="text-gray-400 text-sm"><%= new Date(cat.createdAt).toLocaleDateString('ar-SA') %></td>
+                        <td>
+                            <div class="table-actions">
+                                <button data-modal="editCategoryModal"
+                                        data-edit='<%- JSON.stringify({id: cat._id.toString(), name: cat.name, description: cat.description, icon: cat.icon}) %>'
+                                        data-action="/admin/categories/<%= cat._id %>?_method=PUT"
+                                        class="btn-primary text-xs">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <form action="/admin/categories/<%= cat._id %>?_method=DELETE" method="POST" class="inline">
+                                    <button type="submit" class="btn-danger text-xs confirm-delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                <% }); %>
+                <% if (categories.length === 0) { %>
+                    <tr>
+                        <td colspan="5" class="text-center text-gray-400 py-8">لا توجد تصنيفات</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add Category Modal -->
+<div id="addCategoryModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="text-lg font-bold text-primary">إضافة تصنيف جديد</h3>
+            <button class="modal-close text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+        </div>
+        <form action="/admin/categories" method="POST" class="modal-form">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">الاسم</label>
+                    <input type="text" name="name" class="form-input" value="<%= typeof oldData !== 'undefined' && oldData.name ? oldData.name : '' %>">
+                    <% if (errorFields && errorFields.name) { %>
+                        <p class="text-red-600 text-sm mt-2"><%= errorFields.name %></p>
+                    <% } %>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الوصف</label>
+                    <textarea name="description" rows="2" class="form-input resize-none"><%= typeof oldData !== 'undefined' && oldData.description ? oldData.description : '' %></textarea>
+                    <% if (errorFields && errorFields.description) { %>
+                        <p class="text-red-600 text-sm mt-2"><%= errorFields.description %></p>
+                    <% } %>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الأيقونة (Font Awesome class)</label>
+                    <input type="text" name="icon" class="form-input" placeholder="fa-layer-group" value="<%= typeof oldData !== 'undefined' && oldData.icon ? oldData.icon : '' %>">
+                    <% if (errorFields && errorFields.icon) { %>
+                        <p class="text-red-600 text-sm mt-2"><%= errorFields.icon %></p>
+                    <% } %>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-close btn-outline text-sm">إلغاء</button>
+                <button type="submit" class="btn-success text-sm"><i class="fas fa-plus"></i> إضافة</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Category Modal -->
+<div id="editCategoryModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="text-lg font-bold text-primary">تعديل التصنيف</h3>
+            <button class="modal-close text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+        </div>
+        <form action="" method="POST" class="modal-form">
+            <input type="hidden" name="id">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">الاسم</label>
+                    <input type="text" name="name" class="form-input" >
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الوصف</label>
+                    <textarea name="description" rows="2" class="form-input resize-none"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الأيقونة</label>
+                    <input type="text" name="icon" class="form-input">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-close btn-outline text-sm">إلغاء</button>
+                <button type="submit" class="btn-primary text-sm"><i class="fas fa-save"></i> حفظ</button>
+            </div>
+        </form>
+    </div>
+</div>
+   </main>
+        </div>
+    </div>
+
+    <script src="/js/admin.js"></script>
+</body>
+</html>

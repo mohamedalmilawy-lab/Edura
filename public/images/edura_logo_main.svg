@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="360" viewBox="0 0 1000 360">
+  <defs>
+    <!-- Primary gradient: Deep indigo to violet -->
+    <linearGradient id="bookGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4f46e5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Accent gradient: Cyan to sky blue -->
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0ea5e9;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Soft glow filter for the knowledge node -->
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Subtle shadow for depth -->
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#4f46e5" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- === ICON: Stylized open book with knowledge glow === -->
+  <g transform="translate(70, 55)" filter="url(#softShadow)">
+    <!-- Outer subtle ring -->
+    <circle cx="125" cy="125" r="115" fill="none" stroke="#e2e8f0" stroke-width="1.5" opacity="0.6"/>
+    <circle cx="125" cy="125" r="105" fill="none" stroke="#f1f5f9" stroke-width="1" opacity="0.4"/>
+
+    <!-- Left page (forms part of an abstract 'E') -->
+    <path d="M 125 185
+             C 125 185, 75 175, 55 180
+             L 55 65
+             C 75 60, 125 75, 125 75
+             L 125 185 Z" 
+          fill="url(#bookGrad)"/>
+
+    <!-- Right page -->
+    <path d="M 125 185
+             C 125 185, 175 175, 195 180
+             L 195 65
+             C 175 60, 125 75, 125 75
+             L 125 185 Z" 
+          fill="#6366f1"/>
+
+    <!-- Book spine/crease -->
+    <path d="M 125 75 L 125 185" stroke="#3730a3" stroke-width="5" stroke-linecap="round"/>
+
+    <!-- Left page lines -->
+    <line x1="72" y1="92" x2="116" y2="92" stroke="#818cf8" stroke-width="3.5" stroke-linecap="round" opacity="0.65"/>
+    <line x1="72" y1="115" x2="116" y2="115" stroke="#818cf8" stroke-width="3.5" stroke-linecap="round" opacity="0.65"/>
+    <line x1="72" y1="138" x2="116" y2="138" stroke="#818cf8" stroke-width="3.5" stroke-linecap="round" opacity="0.65"/>
+    <line x1="72" y1="161" x2="116" y2="161" stroke="#818cf8" stroke-width="3.5" stroke-linecap="round" opacity="0.65"/>
+
+    <!-- Right page lines -->
+    <line x1="134" y1="92" x2="178" y2="92" stroke="#a5b4fc" stroke-width="3.5" stroke-linecap="round" opacity="0.65"/>
+    <line x1="134" y1="115" x2="178" y2="115" stroke="#a5b4fc" stroke-width="3.5" stroke-linecap="round" opacity="0.65"/>
+    <line x1="134" y1="138" x2="178" y2="138" stroke="#a5b4fc" stroke-width="3.5" stroke-linecap="round" opacity="0.65"/>
+    <line x1="134" y1="161" x2="178" y2="161" stroke="#a5b4fc" stroke-width="3.5" stroke-linecap="round" opacity="0.65"/>
+
+    <!-- Knowledge/Light element: Glowing node above book -->
+    <circle cx="125" cy="38" r="14" fill="url(#accentGrad)" filter="url(#softGlow)"/>
+    <circle cx="125" cy="38" r="7" fill="#cffafe"/>
+
+    <!-- Light rays -->
+    <line x1="125" y1="16" x2="125" y2="4" stroke="url(#accentGrad)" stroke-width="4" stroke-linecap="round"/>
+    <line x1="106" y1="22" x2="97" y2="11" stroke="url(#accentGrad)" stroke-width="4" stroke-linecap="round"/>
+    <line x1="144" y1="22" x2="153" y2="11" stroke="url(#accentGrad)" stroke-width="4" stroke-linecap="round"/>
+    <line x1="95" y1="38" x2="82" y2="38" stroke="url(#accentGrad)" stroke-width="4" stroke-linecap="round"/>
+    <line x1="155" y1="38" x2="168" y2="38" stroke="url(#accentGrad)" stroke-width="4" stroke-linecap="round"/>
+
+    <!-- Connection: dotted line from glow to book -->
+    <line x1="125" y1="54" x2="125" y2="72" stroke="#06b6d4" stroke-width="2" stroke-dasharray="5 4" opacity="0.5"/>
+  </g>
+
+  <!-- === WORDMARK: Edura === -->
+  <text x="340" y="200" 
+        font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" 
+        font-size="150" 
+        font-weight="800" 
+        fill="#0f172a" 
+        letter-spacing="-4"
+        style="font-feature-settings: 'ss01';">Edura</text>
+
+  <!-- Accent dot (replaces the 'i' dot conceptually, placed as decorative element) -->
+  <circle cx="628" cy="148" r="11" fill="#06b6d4"/>
+
+  <!-- === TAGLINE === -->
+  <text x="345" y="245" 
+        font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" 
+        font-size="22" 
+        font-weight="600" 
+        fill="#94a3b8" 
+        letter-spacing="6">LEARNING PLATFORM</text>
+</svg>

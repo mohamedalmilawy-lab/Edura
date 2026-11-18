@@ -1,0 +1,229 @@
+<%- include('../../layouts/teacher') %>
+
+<!-- Search & Actions -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+        <form action="/teacher/courses" method="GET" class="flex flex-wrap gap-3 flex-1">
+            <input type="text" name="search" value="<%= typeof search !== 'undefined' ? search : '' %>" placeholder="بحث..." class="form-input flex-1 min-w-[200px]">
+            <select name="status" class="form-input">
+                <option value="">جميع الحالات</option>
+                <option value="available">متاح</option>
+                <option value="unavailable">غير متاح</option>
+            </select>
+            <button type="submit" class="btn-primary"><i class="fas fa-search"></i></button>
+        </form>
+        <button data-modal="addCourseModal" class="btn-success">
+            <i class="fas fa-plus"></i> إضافة كورس
+        </button>
+    </div>
+    <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+        <div class="bg-red-50 border-r-4 border-red-500 p-4 rounded mt-4">
+            <% errors.forEach(function(error) { %>
+                <p class="text-red-700 text-sm"><%= error %></p>
+            <% }); %>
+        </div>
+    <% } %>
+</div>
+
+<!-- Courses Table -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>الكورس</th>
+                    <th>التصنيف</th>
+                    <th>السعر</th>
+                    <th>الحالة</th>
+                    <th>المشتركون</th>
+                    <th>التحكم</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% courses.forEach(function(course) { %>
+                    <tr>
+                        <td class="flex items-center gap-3">
+                            <img src="<%= course.image %>" alt="" class="w-12 h-9 rounded object-cover">
+                            <span class="font-semibold text-sm"><%= course.title %></span>
+                        </td>
+                        <td><%= course.category ? course.category.name : '-' %></td>
+                        <td class="font-bold text-accent"><%= course.price %> ل.س</td>
+                        <td>
+                            <span class="badge <%= course.status === 'available' ? 'badge-available' : 'badge-unavailable' %>">
+                                <%= course.status === 'available' ? 'متاح' : 'غير متاح' %>
+                            </span>
+                        </td>
+                        <td><%= course.enrolledCount %></td>
+                        <td>
+                            <div class="table-actions">
+                                <button data-modal="editCourseModal"
+                                        data-edit='<%- JSON.stringify({id: course._id.toString(), title: course.title, description: course.description, price: course.price, category: course.category ? course.category._id.toString() : '', status: course.status, videos: course.videos || []}) %>'
+                                        data-action="/teacher/courses/<%= course._id %>?_method=PUT"
+                                        class="btn-primary text-xs">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <form action="/teacher/courses/<%= course._id %>?_method=DELETE" method="POST" class="inline">
+                                    <button type="submit" class="btn-danger text-xs confirm-delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                <% }); %>
+                <% if (courses.length === 0) { %>
+                    <tr>
+                        <td colspan="6" class="text-center text-gray-400 py-8">لا توجد كورسات</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add Course Modal -->
+<div id="addCourseModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="text-lg font-bold text-primary">إضافة كورس جديد</h3>
+            <button class="modal-close text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+        </div>
+        <form action="/teacher/courses" method="POST" enctype="multipart/form-data" class="modal-form">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">العنوان</label>
+                    <input type="text" name="title" class="form-input"  value="<%= typeof oldData !== 'undefined' && oldData.title ? oldData.title : '' %>">
+                    <% if (errorFields && errorFields.title) { %>
+                        <p class="text-red-600 text-sm mt-2"><%= errorFields.title %></p>
+                    <% } %>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الوصف</label>
+                    <textarea name="description" rows="3" class="form-input resize-none" ><%= typeof oldData !== 'undefined' && oldData.description ? oldData.description : '' %></textarea>
+                    <% if (errorFields && errorFields.description) { %>
+                        <p class="text-red-600 text-sm mt-2"><%= errorFields.description %></p>
+                    <% } %>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label class="form-label">السعر</label>
+                        <input type="number" name="price" class="form-input" min="0"  value="<%= typeof oldData !== 'undefined' && oldData.price ? oldData.price : '' %>">
+                        <% if (errorFields && errorFields.price) { %>
+                            <p class="text-red-600 text-sm mt-2"><%= errorFields.price %></p>
+                        <% } %>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">الحالة</label>
+                        <select name="status" class="form-input">
+                            <option value="available" <%= typeof oldData !== 'undefined' && oldData.status === 'available' ? 'selected' : '' %>>متاح</option>
+                            <option value="unavailable" <%= typeof oldData !== 'undefined' && oldData.status === 'unavailable' ? 'selected' : '' %>>غير متاح</option>
+                        </select>
+                        <% if (errorFields && errorFields.status) { %>
+                            <p class="text-red-600 text-sm mt-2"><%= errorFields.status %></p>
+                        <% } %>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">التصنيف</label>
+                    <select name="category" class="form-input" >
+                        <% categories.forEach(function(cat) { %>
+                            <option value="<%= cat._id %>" <%= typeof oldData !== 'undefined' && oldData.category === cat._id ? 'selected' : '' %>><%= cat.name %></option>
+                        <% }); %>
+                    </select>
+                    <% if (errorFields && errorFields.category) { %>
+                        <p class="text-red-600 text-sm mt-2"><%= errorFields.category %></p>
+                    <% } %>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الصورة</label>
+                    <input type="file" name="image" class="form-input" accept="image/*">
+                </div>
+                <div class="form-group" id="addVideosContainer">
+                    <label class="form-label">روابط الفيديو (يمكنك إضافة أكثر من رابط)</label>
+                    <div class="video-inputs-wrapper">
+                        <div class="video-input-group flex gap-2 mb-2">
+                            <input type="text" name="videos[]" class="form-input flex-1" placeholder="https://www.youtube.com/watch?v=...">
+                            <button type="button" class="btn-success add-video-btn px-4 rounded" title="إضافة فيديو آخر">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-close btn-outline text-sm">إلغاء</button>
+                <button type="submit" class="btn-success text-sm"><i class="fas fa-plus"></i> إضافة</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Course Modal -->
+<div id="editCourseModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="text-lg font-bold text-primary">تعديل الكورس</h3>
+            <button class="modal-close text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+        </div>
+        <form action="" method="POST" enctype="multipart/form-data" class="modal-form">
+            <input type="hidden" name="id">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">العنوان</label>
+                    <input type="text" name="title" class="form-input" >
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الوصف</label>
+                    <textarea name="description" rows="3" class="form-input resize-none" ></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label class="form-label">السعر</label>
+                        <input type="number" name="price" class="form-input" min="0" >
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">الحالة</label>
+                        <select name="status" class="form-input">
+                            <option value="available">متاح</option>
+                            <option value="unavailable">غير متاح</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">التصنيف</label>
+                    <select name="category" class="form-input" >
+                        <% categories.forEach(function(cat) { %>
+                            <option value="<%= cat._id %>"><%= cat.name %></option>
+                        <% }); %>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الصورة (اتركها فارغة للإبقاء على الحالية)</label>
+                    <input type="file" name="image" class="form-input" accept="image/*">
+                </div>
+                <div class="form-group" id="editVideosContainer">
+                    <label class="form-label">روابط الفيديو</label>
+                    <div class="video-inputs-wrapper" id="editTeacherVideosWrapper">
+                        <div class="video-input-group flex gap-2 mb-2">
+                            <input type="text" name="videos[]" class="form-input flex-1" placeholder="https://www.youtube.com/watch?v=...">
+                            <button type="button" class="btn-success add-video-btn px-4 rounded">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-close btn-outline text-sm">إلغاء</button>
+                <button type="submit" class="btn-primary text-sm"><i class="fas fa-save"></i> حفظ</button>
+            </div>
+        </form>
+    </div>
+</div>
+   </main>
+        </div>
+    </div>
+
+    <script src="/js/admin.js"></script>
+</body>
+</html>

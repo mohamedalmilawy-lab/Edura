@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول | Edura - لوحة التحكم</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e3a5f',
+                        primaryLight: '#2a4f7f',
+                        primaryDark: '#152a45',
+                        accent: '#f59e0b',
+                        accentLight: '#fbbf24',
+                        accentDark: '#d97706'
+                    },
+                    fontFamily: {
+                        tajawal: ['Tajawal', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="font-tajawal bg-gray-100">
+    <div class="min-h-screen flex items-center justify-center py-12 px-4">
+        <div class="max-w-md w-full">
+            <!-- Logo -->
+            <div class="text-center mb-8">
+                <img src="../images/edura_logo_main.svg" alt="Edura Logo" class="w-64 mx-auto">
+                <p class="text-gray-500 mt-2">تسجيل الدخول إلى لوحة التحكم</p>
+            </div>
+
+            <!-- Card -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
+                <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+                    <div class="bg-red-50 border-r-4 border-red-500 p-4 rounded mb-6">
+                        <% errors.forEach(function(error) { %>
+                            <p class="text-red-700 text-sm"><%= error %></p>
+                        <% }); %>
+                    </div>
+                <% } %>
+
+                <form action="/login" method="POST" class="space-y-5">
+                    <div>
+                        <label class="form-label">البريد الإلكتروني</label>
+                        <div class="relative">
+                            <i class="fas fa-envelope absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="email" name="email" value="<%= typeof oldData !== 'undefined' && oldData.email ? oldData.email : (typeof email !== 'undefined' ? email : '') %>"
+                                   class="form-input pr-10" placeholder="your@email.com">
+                        </div>
+                        <% if (errorFields && errorFields.email) { %>
+                            <p class="text-red-600 text-sm mt-2"><%= errorFields.email %></p>
+                        <% } %>
+                    </div>
+                    <div>
+                        <label class="form-label">كلمة السر</label>
+                        <div class="relative mb-2">
+                            <i class="fas fa-lock absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="password" name="password" class="form-input pr-10" placeholder="••••••">
+                        </div>
+                        <% if (errorFields && errorFields.password) { %>
+                            <p class="text-red-600 text-sm mt-2"><%= errorFields.password %></p>
+                        <% } %>
+                    </div>
+                    <button type="submit" class="btn-primary w-full justify-center py-3">
+                        <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
