@@ -23,6 +23,13 @@ function convertToYouTubeUrl(url) {
   return url;
 }
 
+// يقرأ حقول العرض (offerPrice / offerEndDate) من req.body ويرجع قيماً جاهزة للحفظ
+function parseOfferFields(body) {
+  const offerPrice = body.offerPrice === '' || body.offerPrice == null ? null : Number(body.offerPrice);
+  const offerEndDate = body.offerEndDate ? new Date(body.offerEndDate) : null;
+  return { offerPrice, offerEndDate };
+}
+
 // GET /api/courses - List all courses with filters
 exports.getAllCourses = async (req, res) => {
   try {
@@ -218,6 +225,7 @@ exports.getAdminCourses = async (req, res) => {
 exports.createCourse = async (req, res) => {
   try {
     const { title, description, price, category, teacher, status, videos } = req.body;
+    const offer = parseOfferFields(req.body);
 
     const courseData = {
       title,
@@ -226,7 +234,9 @@ exports.createCourse = async (req, res) => {
       category,
       teacher,
       status: status || 'available',
-      videos: []
+      videos: [],
+      offerPrice: offer.offerPrice,
+      offerEndDate: offer.offerEndDate
     };
     
     if (videos) {
@@ -268,6 +278,9 @@ exports.updateCourse = async (req, res) => {
     course.price = parseFloat(price);
     course.category = category;
     course.teacher = teacher;
+    const offer = parseOfferFields(req.body);
+    course.offerPrice = offer.offerPrice;
+    course.offerEndDate = offer.offerEndDate;
     course.status = status || course.status;
 
     if (videos) {
@@ -365,6 +378,7 @@ exports.getTeacherCourses = async (req, res) => {
 exports.createTeacherCourse = async (req, res) => {
   try {
     const { title, description, price, category, status, videos } = req.body;
+    const offer = parseOfferFields(req.body);
     
     const courseData = {
       title,
@@ -373,7 +387,9 @@ exports.createTeacherCourse = async (req, res) => {
       category,
       teacher: req.session.userId,
       status: status || 'available',
-      videos: []
+      videos: [],
+      offerPrice: offer.offerPrice,
+      offerEndDate: offer.offerEndDate
     };
     
     if (videos) {
@@ -403,6 +419,7 @@ exports.createTeacherCourse = async (req, res) => {
 exports.updateTeacherCourse = async (req, res) => {
   try {
     const { title, description, price, category, status, videos } = req.body;
+    const offer = parseOfferFields(req.body);
     const course = await Course.findOne({
       _id: req.params.id,
       teacher: req.session.userId
@@ -417,6 +434,8 @@ exports.updateTeacherCourse = async (req, res) => {
     course.description = description;
     course.price = parseFloat(price);
     course.category = category;
+    course.offerPrice = offer.offerPrice;
+    course.offerEndDate = offer.offerEndDate;
     course.status = status || course.status;
 
     if (videos) {

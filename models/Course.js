@@ -43,10 +43,36 @@ const courseSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  // نسبة خصم مئوية (0–100). مثال: 20 يعني خصم 20% على سعر الكورس.
+  offerPrice: {
+      type: Number,
+      min: [0, 'نسبة الخصم لا يمكن أن تكون سالبة.'],
+      max: [100, 'نسبة الخصم لا يمكن أن تتجاوز 100%.']
+  },
+  // تاريخ انتهاء العرض — إذا مرّ هذا التاريخ تُهمَل نسبة الخصم تلقائياً
+  offerEndDate: {
+      type: Date
+  },
   createdAt: {
     type: Date,
     default: Date.now
   }
 });
+
+// هل العرض فعّال حالياً؟ (نسبة خصم موجودة وتاريخ الانتهاء لم يمرّ بعد)
+courseSchema.virtual('hasActiveOffer').get(function () {
+  if (!this.offerPrice || this.offerPrice <= 0) return false;
+  if (this.offerEndDate && this.offerEndDate <= new Date()) return false;
+  return true;
+});
+
+// السعر الفعلي بعد تطبيق نسبة الخصم إن كان العرض فعّالاً
+courseSchema.virtual('effectivePrice').get(function () {
+  if (!this.hasActiveOffer) return this.price;
+  return Math.round(this.price * (100 - this.offerPrice)) / 100;
+});
+
+courseSchema.set('toJSON', { virtuals: true });
+courseSchema.set('toObject', { virtuals: true });
 
 module.exports = mongoose.model('Course', courseSchema);

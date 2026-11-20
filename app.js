@@ -21,6 +21,7 @@ const userRoutes = require('./routes/users');
 const contactRoutes = require('./routes/contact');
 const commentRoutes = require('./routes/comments');
 const chatRoutes = require('./routes/chat');
+const bannerRoutes = require('./routes/banners');
 const adminRoutes = require('./routes/admin');
 const teacherRoutes = require('./routes/teacher');
 
@@ -104,6 +105,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/banners', bannerRoutes);
 
 // API root
 app.get('/api', (req, res) => ApiResponse.ok(res, 'Edura API', {

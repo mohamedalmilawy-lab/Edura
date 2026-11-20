@@ -90,7 +90,24 @@ $(document).ready(function() {
         // Fill form fields
         for (const [key, value] of Object.entries(data)) {
             if (key === 'videos') continue;
-            $(`#${modalId} [name="${key}"]`).val(value);
+            if (key === 'imageUrl') {
+                const $wrap = $(`#${modalId} .current-image`);
+                if (value) {
+                    $wrap.find('img').attr('src', value);
+                    $wrap.removeClass('hidden');
+                } else {
+                    $wrap.addClass('hidden');
+                }
+                continue;
+            }
+            const $field = $(`#${modalId} [name="${key}"]`);
+            const $checkbox = $field.filter('input[type="checkbox"]');
+            if ($checkbox.length) {
+                $checkbox.prop('checked', !!value);
+            } else {
+                $field.val(value);
+                $field.filter('select').trigger('change');
+            }
         }
 
         // Handle videos separately

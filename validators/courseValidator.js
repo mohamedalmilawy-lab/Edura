@@ -28,6 +28,14 @@ const courseSchema = Joi.object({
     'any.required': 'الحالة مطلوبة'
   }),
   teacher: Joi.string().trim().optional().allow(''),
+  offerPrice: Joi.number().min(0).max(100).optional().allow('', null).messages({
+    'number.base': 'نسبة الخصم يجب أن تكون رقماً',
+    'number.min': 'نسبة الخصم لا يمكن أن تكون سالبة',
+    'number.max': 'نسبة الخصم لا يمكن أن تتجاوز 100%'
+  }),
+  offerEndDate: Joi.date().optional().allow('', null).messages({
+    'date.base': 'تاريخ انتهاء العرض غير صحيح'
+  }),
   videos: Joi.any().optional()
 });
 

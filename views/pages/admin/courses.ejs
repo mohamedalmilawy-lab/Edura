@@ -1,5 +1,8 @@
 <%- include('../../layouts/admin') %>
 
+<% function toLocalInputValue(d) { if (!d) return ''; const dt = new Date(d); return new Date(dt.getTime() - dt.getTimezoneOffset() * 60000).toISOString().slice(0, 16); } %>
+
+
 <!-- Search & Actions -->
 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
     <div class="flex flex-wrap items-center justify-between gap-4">
@@ -57,7 +60,15 @@
                         </td>
                         <td><%= course.category ? course.category.name : '-' %></td>
                         <td><%= course.teacher ? course.teacher.fullName : '-' %></td>
-                        <td class="font-bold text-accent"><%= course.price %> ل.س</td>
+                        <td class="font-bold text-accent">
+                        <% if (course.hasActiveOffer) { %>
+                            <span class="line-through text-gray-400 text-sm"><%= course.price %></span>
+                            <%= course.effectivePrice %> ل.س
+                            <span class="badge badge-available text-xs">خصم <%= course.offerPrice %>%</span>
+                        <% } else { %>
+                            <%= course.price %> ل.س
+                        <% } %>
+                    </td>
                         <td>
                             <span class="badge <%= course.status === 'available' ? 'badge-available' : 'badge-unavailable' %>">
                                 <%= course.status === 'available' ? 'متاح' : 'غير متاح' %>
@@ -67,7 +78,7 @@
                         <td>
                             <div class="table-actions">
                                 <button data-modal="editCourseModal"
-                                        data-edit='<%- JSON.stringify({id: course._id.toString(), title: course.title, description: course.description, price: course.price, category: course.category ? course.category._id.toString() : '', teacher: course.teacher ? course.teacher._id.toString() : '', status: course.status, videos: course.videos || []}) %>'
+                                        data-edit='<%- JSON.stringify({id: course._id.toString(), title: course.title, description: course.description, price: course.price, category: course.category ? course.category._id.toString() : '', teacher: course.teacher ? course.teacher._id.toString() : '', status: course.status, videos: course.videos || [], offerPrice: course.offerPrice || '', offerEndDate: toLocalInputValue(course.offerEndDate)}) %>'
                                         data-action="/admin/courses/<%= course._id %>?_method=PUT"
                                         class="btn-primary text-xs">
                                     <i class="fas fa-edit"></i>
@@ -132,6 +143,22 @@
                         </select>
                         <% if (errorFields && errorFields.status) { %>
                             <p class="text-red-600 text-sm mt-2"><%= errorFields.status %></p>
+                        <% } %>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label class="form-label">نسبة الخصم % (اختياري)</label>
+                        <input type="number" name="offerPrice" class="form-input" min="0" max="100" step="0.01" value="<%= typeof oldData !== 'undefined' && oldData.offerPrice ? oldData.offerPrice : '' %>">
+                        <% if (errorFields && errorFields.offerPrice) { %>
+                            <p class="text-red-600 text-sm mt-2"><%= errorFields.offerPrice %></p>
+                        <% } %>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">تاريخ انتهاء العرض (اختياري)</label>
+                        <input type="datetime-local" name="offerEndDate" class="form-input" value="<%= typeof oldData !== 'undefined' && oldData.offerEndDate ? oldData.offerEndDate : '' %>">
+                        <% if (errorFields && errorFields.offerEndDate) { %>
+                            <p class="text-red-600 text-sm mt-2"><%= errorFields.offerEndDate %></p>
                         <% } %>
                     </div>
                 </div>
@@ -214,6 +241,18 @@
                             <option value="available">متاح</option>
                             <option value="unavailable">غير متاح</option>
                         </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label class="form-label">نسبة الخصم % (اختياري)</label>
+                        <input type="number" name="offerPrice" class="form-input" min="0" max="100" step="0.01" value="">
+                        
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">تاريخ انتهاء العرض (اختياري)</label>
+                        <input type="datetime-local" name="offerEndDate" class="form-input" value="">
+                        
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">

@@ -9,6 +9,7 @@ const orderController = require('../controllers/orderController');
 const userController = require('../controllers/userController');
 const commentController = require('../controllers/commentController');
 const contactController = require('../controllers/contactController');
+const bannerController = require('../controllers/bannerController');
 const { validateAdminCourse } = require('../validators/courseValidator');
 const { validateCreateUser } = require('../validators/userValidator');
 const { validateCategory } = require('../validators/categoryValidator');
@@ -44,6 +45,12 @@ router.delete('/users/:id', isAdmin, userController.deleteUser);
 // Comments
 router.get('/comments', isAdmin, commentController.getAdminComments);
 router.delete('/comments/:id', isAdmin, commentController.deleteComment);
+
+// Banners
+router.get('/banners', isAdmin, bannerController.getAdminBanners);
+router.post('/banners', isAdmin, upload.single('image'), bannerController.createBanner);
+router.put('/banners/:id', isAdmin, upload.single('image'), bannerController.updateBanner);
+router.delete('/banners/:id', isAdmin, bannerController.deleteBanner);
 
 // Contacts
 router.get('/contacts', isAdmin, contactController.getAdminContacts);

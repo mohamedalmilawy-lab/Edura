@@ -12,7 +12,7 @@ exports.getCart = async (req, res) => {
       });
 
     const courses = cart ? cart.courses : [];
-    const total = courses.reduce((sum, course) => sum + course.price, 0);
+    const total = courses.reduce((sum, course) => sum + course.effectivePrice, 0);
 
     return ApiResponse.ok(res, 'تم جلب السلة بنجاح', {
       courses,
@@ -75,7 +75,7 @@ exports.removeFromCart = async (req, res) => {
     }
     
     const updatedCart = await Cart.findOne({ user: userId }).populate('courses');
-    const total = updatedCart ? updatedCart.courses.reduce((sum, c) => sum + c.price, 0) : 0;
+    const total = updatedCart ? updatedCart.courses.reduce((sum, c) => sum + c.effectivePrice, 0) : 0;
 
     return ApiResponse.ok(res, 'تم إزالة الكورس من السلة', {
       total,

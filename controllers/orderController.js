@@ -77,7 +77,7 @@ exports.confirmOrder = async (req, res) => {
     }
 
     // Calculate total
-    const totalPrice = cart.courses.reduce((sum, course) => sum + course.price, 0);
+    const totalPrice = cart.courses.reduce((sum, course) => sum + course.effectivePrice, 0);
 
     // Check wallet balance
     const user = await User.findById(userId);

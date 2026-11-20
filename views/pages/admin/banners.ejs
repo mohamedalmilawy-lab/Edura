@@ -1,0 +1,223 @@
+<%- include('../../layouts/admin') %>
+
+<!-- Actions -->
+<div class="flex justify-between items-center mb-6">
+    <h3 class="text-lg font-bold text-primary">إدارة اللافتات الإعلانية</h3>
+    <button data-modal="addBannerModal" class="btn-success">
+        <i class="fas fa-plus"></i> إضافة لافتة
+    </button>
+</div>
+<% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+    <div class="bg-red-50 border-r-4 border-red-500 p-4 rounded mb-6">
+        <% errors.forEach(function(error) { %>
+            <p class="text-red-700 text-sm"><%= error %></p>
+        <% }); %>
+    </div>
+<% } %>
+
+<!-- Banners Table -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>الصورة</th>
+                    <th>العنوان</th>
+                    <th>نوع الرابط</th>
+                    <th>الحالة</th>
+                    <th>التاريخ</th>
+                    <th>التحكم</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% banners.forEach(function(b) { %>
+                    <tr>
+                        <td>
+                            <img src="<%= b.imageUrl %>" alt="<%= b.title %>" class="w-16 h-10 rounded object-cover">
+                        </td>
+                        <td class="font-semibold"><%= b.title %></td>
+                        <td class="text-gray-500 text-sm">
+                            <%= b.linkType === 'Course' ? 'كورس' : b.linkType === 'Category' ? 'تصنيف' : 'بدون رابط' %>
+                        </td>
+                        <td>
+                            <span class="badge <%= b.isActive ? 'badge-available' : 'badge-unavailable' %>">
+                                <%= b.isActive ? 'متاحة' : 'موقوفة' %>
+                            </span>
+                        </td>
+                        <td class="text-gray-400 text-sm"><%= new Date(b.createdAt).toLocaleDateString('ar-SA') %></td>
+                        <td>
+                            <div class="table-actions">
+                                <button data-modal="editBannerModal"
+                                        data-edit='<%- JSON.stringify({
+                                            id: b._id.toString(),
+                                            title: b.title,
+                                            linkType: b.linkType,
+                                            link: (b.link || []).map(function(l){ return l.toString(); }),
+                                            isActive: b.isActive,
+                                            imageUrl: b.imageUrl
+                                        }) %>'
+                                        data-action="/admin/banners/<%= b._id %>?_method=PUT"
+                                        class="btn-primary text-xs">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <form action="/admin/banners/<%= b._id %>?_method=DELETE" method="POST" class="inline">
+                                    <button type="submit" class="btn-danger text-xs confirm-delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                <% }); %>
+                <% if (banners.length === 0) { %>
+                    <tr>
+                        <td colspan="6" class="text-center text-gray-400 py-8">لا توجد لافتات</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add Banner Modal -->
+<div id="addBannerModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="text-lg font-bold text-primary">إضافة لافتة جديدة</h3>
+            <button class="modal-close text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+        </div>
+        <form action="/admin/banners" method="POST" enctype="multipart/form-data" class="modal-form">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">عنوان اللافتة</label>
+                    <input type="text" name="title" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">نوع الرابط</label>
+                    <select name="linkType" class="form-input link-type-select">
+                        <option value="Course">كورس</option>
+                        <option value="Category">تصنيف</option>
+                        <option value="Non">بدون رابط</option>
+                    </select>
+                </div>
+                <div class="form-group link-courses-group">
+                    <label class="form-label">الكورسات المرتبطة (يمكن اختيار أكثر من واحد)</label>
+                    <select name="link" class="form-input link-select link-courses" multiple size="5">
+                        <% courses.forEach(function(c) { %>
+                            <option value="<%= c._id %>"><%= c.title %></option>
+                        <% }); %>
+                    </select>
+                </div>
+                <div class="form-group link-categories-group hidden">
+                    <label class="form-label">التصنيفات المرتبطة (يمكن اختيار أكثر من واحد)</label>
+                    <select name="link" class="form-input link-select link-categories" multiple size="5" disabled>
+                        <% categories.forEach(function(c) { %>
+                            <option value="<%= c._id %>"><%= c.name %></option>
+                        <% }); %>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">صورة اللافتة</label>
+                    <input type="file" name="image" class="form-input" accept="image/*" required>
+                </div>
+                <div class="form-group flex items-center gap-2">
+                    <input type="hidden" name="isActive" value="off">
+                    <input type="checkbox" name="isActive" value="on" class="w-4 h-4" checked>
+                    <label class="form-label mb-0">اللافتة متاحة</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-close btn-outline text-sm">إلغاء</button>
+                <button type="submit" class="btn-success text-sm"><i class="fas fa-plus"></i> إضافة</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Banner Modal -->
+<div id="editBannerModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="text-lg font-bold text-primary">تعديل اللافتة</h3>
+            <button class="modal-close text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+        </div>
+        <form action="" method="POST" enctype="multipart/form-data" class="modal-form">
+            <div class="modal-body">
+                <div class="form-group current-image mb-3 hidden">
+                    <label class="form-label">الصورة الحالية</label>
+                    <img src="" alt="" class="w-32 h-20 rounded object-cover border border-gray-200">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">عنوان اللافتة</label>
+                    <input type="text" name="title" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">نوع الرابط</label>
+                    <select name="linkType" class="form-input link-type-select">
+                        <option value="Course">كورس</option>
+                        <option value="Category">تصنيف</option>
+                        <option value="Non">بدون رابط</option>
+                    </select>
+                </div>
+                <div class="form-group link-courses-group">
+                    <label class="form-label">الكورسات المرتبطة</label>
+                    <select name="link" class="form-input link-select link-courses" multiple size="5">
+                        <% courses.forEach(function(c) { %>
+                            <option value="<%= c._id %>"><%= c.title %></option>
+                        <% }); %>
+                    </select>
+                </div>
+                <div class="form-group link-categories-group hidden">
+                    <label class="form-label">التصنيفات المرتبطة</label>
+                    <select name="link" class="form-input link-select link-categories" multiple size="5" disabled>
+                        <% categories.forEach(function(c) { %>
+                            <option value="<%= c._id %>"><%= c.name %></option>
+                        <% }); %>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">صورة جديدة (اتركها فارغة للإبقاء على الحالية)</label>
+                    <input type="file" name="image" class="form-input" accept="image/*">
+                </div>
+                <div class="form-group flex items-center gap-2">
+                    <input type="hidden" name="isActive" value="off">
+                    <input type="checkbox" name="isActive" value="on" class="w-4 h-4">
+                    <label class="form-label mb-0">اللافتة متاحة</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-close btn-outline text-sm">إلغاء</button>
+                <button type="submit" class="btn-primary text-sm"><i class="fas fa-save"></i> حفظ</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// إظهار/إخفاء وقفل قوائم الروابط حسب نوع الرابط المختار
+function syncLinkSelects(modal) {
+    const linkType = $(modal).find('.link-type-select').val();
+    const $courses = $(modal).find('.link-courses');
+    const $categories = $(modal).find('.link-categories');
+
+    const showCourses = linkType === 'Course';
+    const showCategories = linkType === 'Category';
+
+    $courses.prop('disabled', !showCourses);
+    $categories.prop('disabled', !showCategories);
+    $(modal).find('.link-courses-group').toggleClass('hidden', !showCourses);
+    $(modal).find('.link-categories-group').toggleClass('hidden', !showCategories);
+}
+
+$(document).on('change', '.link-type-select', function() {
+    syncLinkSelects($(this).closest('.modal-content'));
+});
+</script>
+
+   </main>
+        </div>
+    </div>
+
+    <script src="/js/admin.js"></script>
+</body>
+</html>

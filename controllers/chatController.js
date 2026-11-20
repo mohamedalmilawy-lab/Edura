@@ -39,7 +39,7 @@ exports.createChat = asyncHandler(async (req, res) => {
     for (const [catName, products] of Object.entries(coursesGroupedByCat)) {
         catalogText += `\n[تصنيف ${catName}]:\n`;
         products.forEach(p => {
-            const priceText = `${p.price.toLocaleString('ar-SY')} ل.س`;
+            const priceText = p.hasActiveOffer ? `${p.effectivePrice.toLocaleString('ar-SY')} ل.س (بدلاً من ${p.price.toLocaleString('ar-SY')})` : `${p.price.toLocaleString('ar-SY')} ل.س`;
             const teacher = p.teacher ? `المعلم: ${p.teacher.fullName}` : "المعلم غير معروف";
             catalogText += `- ${p.title}: ${p.description.substring(0, 100)}... | السعر: ${priceText} | ${teacher}\n`;
         });
