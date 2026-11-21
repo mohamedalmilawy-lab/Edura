@@ -5,6 +5,8 @@ const Transaction = require('../models/Transaction');
 const Course = require('../models/Course');
 const Comment = require('../models/Comment');
 const ApiResponse = require('../utils/ApiResponse');
+const DiscountCode = require('../models/DiscountCode');
+const { calculateDiscount, isCodeUsable } = require('./discountCodeController');
 
 // GET /api/orders - User's confirmed orders
 exports.getOrders = async (req, res) => {
@@ -71,13 +73,31 @@ exports.confirmOrder = async (req, res) => {
     const userId = req.user.id;
 
     // Get cart
-    const cart = await Cart.findOne({ user: userId }).populate('courses');
+    const cart = await Cart.findOne({ user: userId })
+      .populate('courses')
+      .populate('discountCode');
     if (!cart || cart.courses.length === 0) {
       return ApiResponse.badRequest(res, 'السلة فارغة');
     }
 
-    // Calculate total
-    const totalPrice = cart.courses.reduce((sum, course) => sum + course.effectivePrice, 0);
+    const subtotal = cart.courses.reduce((sum, course) => sum + Number(course.effectivePrice || course.price || 0), 0);
+    let discountAmount = 0;
+    let discountCodeName = null;
+
+    if (cart.discountCode) {
+      const code = await DiscountCode.findById(cart.discountCode._id);
+      if (!code || !isCodeUsable(code)) {
+        return ApiResponse.badRequest(res, 'كود الخصم لم يعد صالحاً');
+      }
+      const calculation = calculateDiscount(code, cart.courses);
+      if (calculation.eligibleCourses.length === 0) {
+        return ApiResponse.badRequest(res, 'كود الخصم لا ينطبق على الكورسات الموجودة في السلة');
+      }
+      discountAmount = calculation.discountAmount;
+      discountCodeName = code.code;
+    }
+
+    const totalPrice = Math.round((subtotal - discountAmount) * 100) / 100;
 
     // Check wallet balance
     const user = await User.findById(userId);
@@ -87,6 +107,24 @@ exports.confirmOrder = async (req, res) => {
         `رصيد المحفظة غير كافي. رصيدك: ${user.walletBalance} د.م.، المطلوب: ${totalPrice} د.م.`,
         { walletBalance: user.walletBalance, totalPrice }
       );
+    }
+
+    if (cart.discountCode) {
+      const code = await DiscountCode.findOneAndUpdate(
+        {
+          _id: cart.discountCode._id,
+          isActive: true,
+          $and: [
+            { $or: [{ expiresAt: null }, { expiresAt: { $gt: new Date() } }] },
+            { $or: [{ maxUses: null }, { $expr: { $lt: ['$usedCount', '$maxUses'] } }] }
+          ]
+        },
+        { $inc: { usedCount: 1 } },
+        { new: true }
+      );
+      if (!code) {
+        return ApiResponse.badRequest(res, 'تم استنفاد كود الخصم قبل إتمام الطلب');
+      }
     }
 
     // Deduct from wallet
@@ -100,6 +138,8 @@ exports.confirmOrder = async (req, res) => {
       user: userId,
       courses: cart.courses.map(c => c._id),
       totalPrice,
+      discountCode: discountCodeName,
+      discountAmount,
       status: 'confirmed'
     });
     await order.save();
@@ -120,6 +160,7 @@ exports.confirmOrder = async (req, res) => {
 
     // Clear cart
     cart.courses = [];
+    cart.discountCode = null;
     await cart.save();
 
     return ApiResponse.created(res, `تم تأكيد الطلب بنجاح! رقم الطلب: ${order.orderNumber}`, {

@@ -1,0 +1,92 @@
+<%- include('../../layouts/teacher') %>
+
+<div class="flex justify-between items-center mb-6">
+    <h3 class="text-lg font-bold text-primary">أكواد الخصم لكورساتي</h3>
+    <button data-modal="addTeacherDiscountModal" class="btn-success">
+        <i class="fas fa-plus"></i> إضافة كود خصم
+    </button>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="data-table">
+            <thead><tr><th>الكود</th><th>الخصم</th><th>الكورسات</th><th>الاستخدام</th><th>الحالة</th><th>الانتهاء</th><th>التحكم</th></tr></thead>
+            <tbody>
+                <% discountCodes.forEach(function(discount) { %>
+                    <tr>
+                        <td class="font-bold text-primary"><%= discount.code %></td>
+                        <td><%= discount.discountValue %><%= discount.discountType === 'percentage' ? '%' : ' ل.س' %></td>
+                        <td><%= discount.courses.length %> كورس</td>
+                        <td><%= discount.usedCount %> / <%= discount.maxUses %></td>
+                        <td><span class="badge <%= discount.isActive ? 'badge-available' : 'badge-unavailable' %>"><%= discount.isActive ? 'مفعّل' : 'معطّل' %></span></td>
+                        <td class="text-sm"><%= discount.expiresAt ? new Date(discount.expiresAt).toLocaleString('ar-SA') : 'بلا انتهاء' %></td>
+                        <td>
+                            <div class="table-actions">
+                                <button data-modal="editTeacherDiscountModal"
+                                    data-edit='<%- JSON.stringify({id: discount._id.toString(), code: discount.code, discountType: discount.discountType, discountValue: discount.discountValue, courses: discount.courses.map(function(c) { return c._id.toString(); }), maxUses: discount.maxUses, isActive: discount.isActive, expiresAt: discount.expiresAt ? new Date(discount.expiresAt.getTime() - discount.expiresAt.getTimezoneOffset() * 60000).toISOString().slice(0,16) : ''}) %>'
+                                    data-action="/teacher/discount-codes/<%= discount._id %>?_method=PUT"
+                                    class="btn-primary text-xs"><i class="fas fa-edit"></i></button>
+                                <form action="/teacher/discount-codes/<%= discount._id %>?_method=DELETE" method="POST" class="inline">
+                                    <button type="submit" class="btn-danger text-xs confirm-delete"><i class="fas fa-trash"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                <% }); %>
+                <% if (discountCodes.length === 0) { %><tr><td colspan="7" class="text-center text-gray-400 py-8">لا توجد أكواد خصم</td></tr><% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="addTeacherDiscountModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header"><h3 class="text-lg font-bold text-primary">إضافة كود خصم لكورساتي</h3><button class="modal-close text-gray-400"><i class="fas fa-times"></i></button></div>
+        <form action="/teacher/discount-codes" method="POST" class="modal-form">
+            <div class="modal-body">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group"><label class="form-label">الكود</label><input type="text" name="code" class="form-input" minlength="3" maxlength="50" required></div>
+                    <div class="form-group"><label class="form-label">الحد الأقصى للاستخدام</label><input type="number" name="maxUses" class="form-input" min="1" required></div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group"><label class="form-label">نوع الخصم</label><select name="discountType" class="form-input"><option value="percentage">نسبة مئوية</option><option value="fixed">مبلغ ثابت</option></select></div>
+                    <div class="form-group"><label class="form-label">قيمة الخصم</label><input type="number" name="discountValue" class="form-input" min="0.01" step="0.01" required></div>
+                </div>
+                <div class="form-group"><label class="form-label">الكورسات الخاصة بك</label><select name="courses" class="form-input" multiple size="6" required><% courses.forEach(function(course) { %><option value="<%= course._id %>"><%= course.title %></option><% }); %></select></div>
+                <div class="form-group"><label class="form-label">تاريخ الانتهاء (اختياري)</label><input type="datetime-local" name="expiresAt" class="form-input"></div>
+                <div class="form-group flex items-center gap-2"><input type="hidden" name="isActive" value="off"><input type="checkbox" name="isActive" value="on" class="w-4 h-4" checked><label class="form-label mb-0">الكود مفعّل</label></div>
+            </div>
+            <div class="modal-footer"><button type="button" class="modal-close btn-outline text-sm">إلغاء</button><button type="submit" class="btn-success text-sm">إضافة</button></div>
+        </form>
+    </div>
+</div>
+
+<div id="editTeacherDiscountModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header"><h3 class="text-lg font-bold text-primary">تعديل كود الخصم</h3><button class="modal-close text-gray-400"><i class="fas fa-times"></i></button></div>
+        <form action="" method="POST" class="modal-form">
+            <div class="modal-body">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group"><label class="form-label">الكود</label><input type="text" name="code" class="form-input" minlength="3" maxlength="50" required></div>
+                    <div class="form-group"><label class="form-label">الحد الأقصى للاستخدام</label><input type="number" name="maxUses" class="form-input" min="1" required></div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group"><label class="form-label">نوع الخصم</label><select name="discountType" class="form-input"><option value="percentage">نسبة مئوية</option><option value="fixed">مبلغ ثابت</option></select></div>
+                    <div class="form-group"><label class="form-label">قيمة الخصم</label><input type="number" name="discountValue" class="form-input" min="0.01" step="0.01" required></div>
+                </div>
+                <div class="form-group"><label class="form-label">الكورسات الخاصة بك</label><select name="courses" class="form-input" multiple size="6" required><% courses.forEach(function(course) { %><option value="<%= course._id %>"><%= course.title %></option><% }); %></select></div>
+                <div class="form-group"><label class="form-label">تاريخ الانتهاء (اختياري)</label><input type="datetime-local" name="expiresAt" class="form-input"></div>
+                <div class="form-group flex items-center gap-2"><input type="hidden" name="isActive" value="off"><input type="checkbox" name="isActive" value="on" class="w-4 h-4"><label class="form-label mb-0">الكود مفعّل</label></div>
+            </div>
+            <div class="modal-footer"><button type="button" class="modal-close btn-outline text-sm">إلغاء</button><button type="submit" class="btn-primary text-sm">حفظ</button></div>
+        </form>
+    </div>
+</div>
+
+   </main>
+        </div>
+    </div>
+
+    <script src="/js/admin.js"></script>
+</body>
+</html>

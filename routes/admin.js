@@ -10,9 +10,11 @@ const userController = require('../controllers/userController');
 const commentController = require('../controllers/commentController');
 const contactController = require('../controllers/contactController');
 const bannerController = require('../controllers/bannerController');
+const discountCodeController = require('../controllers/discountCodeController');
 const { validateAdminCourse } = require('../validators/courseValidator');
 const { validateCreateUser } = require('../validators/userValidator');
 const { validateCategory } = require('../validators/categoryValidator');
+const { validateDiscountCode } = require('../validators/discountCodeValidator');
 
 // Dashboard
 router.get('/dashboard', isAdmin, adminController.getDashboard);
@@ -51,6 +53,12 @@ router.get('/banners', isAdmin, bannerController.getAdminBanners);
 router.post('/banners', isAdmin, upload.single('image'), bannerController.createBanner);
 router.put('/banners/:id', isAdmin, upload.single('image'), bannerController.updateBanner);
 router.delete('/banners/:id', isAdmin, bannerController.deleteBanner);
+
+// Discount codes
+router.get('/discount-codes', isAdmin, discountCodeController.getAdminDiscountCodes);
+router.post('/discount-codes', isAdmin, validateDiscountCode, discountCodeController.createAdminDiscountCode);
+router.put('/discount-codes/:id', isAdmin, validateDiscountCode, discountCodeController.updateAdminDiscountCode);
+router.delete('/discount-codes/:id', isAdmin, discountCodeController.deleteAdminDiscountCode);
 
 // Contacts
 router.get('/contacts', isAdmin, contactController.getAdminContacts);

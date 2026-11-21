@@ -25,6 +25,14 @@ const isTeacher = (req, res, next) => {
   res.redirect('/login');
 };
 
+const isInstructor = (req, res, next) => {
+  if (req.session && req.session.userId && req.session.userRole === 'teacher') {
+    return next();
+  }
+  req.session.error_msg = 'هذه الصفحة متاحة للمدرسين فقط';
+  res.redirect('/login');
+};
+
 // Make user available to all views
 const setUser = (req, res, next) => {
   res.locals.user = req.session.userId ? {
@@ -41,5 +49,6 @@ module.exports = {
   isAuthenticated,
   isAdmin,
   isTeacher,
+  isInstructor,
   setUser
 };

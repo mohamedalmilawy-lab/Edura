@@ -10,7 +10,12 @@ const cartSchema = new mongoose.Schema({
   courses: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Course'
-  }]
+  }],
+  discountCode: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'DiscountCode',
+    default: null
+  }
 });
 
 module.exports = mongoose.model('Cart', cartSchema);
