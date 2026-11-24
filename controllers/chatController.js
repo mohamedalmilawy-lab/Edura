@@ -22,7 +22,7 @@ exports.createChat = asyncHandler(async (req, res) => {
     const [availableCourse, allCategories] = await Promise.all([
         Course.find({ status: 'available' })
             .populate('category')
-            .populate('teacher', 'fullName')
+            .populate('teacher', 'fullName bio profileImage')
             .limit(150),
         Category.find()
     ]);

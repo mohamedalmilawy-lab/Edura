@@ -53,6 +53,7 @@ exports.postLogin = async (req, res) => {
     req.session.userName = user.fullName;
     req.session.userEmail = user.email;
     req.session.userRole = user.role;
+    req.session.userProfileImage = user.profileImage || '/images/default-avatar.svg';
     req.session.walletBalance = user.walletBalance;
 
     req.flash('success_msg', `مرحباً بك ${user.fullName}! تم تسجيل الدخول بنجاح`);

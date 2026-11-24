@@ -1,0 +1,37 @@
+<%- include('../../layouts/admin') %>
+
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 max-w-2xl mx-auto">
+    <h2 class="text-xl font-bold text-primary mb-6 flex justify-center">الملف الشخصي للمدير</h2>
+    <form action="/admin/profile?_method=PUT" method="POST" enctype="multipart/form-data" class="modal-form">
+        <div class="form-group">
+            <label class="form-label flex justify-center">الصورة الشخصية الحالية</label>
+            <img src="<%= admin.profileImage || '/images/default-avatar.svg' %>" alt="<%= admin.fullName %>"
+                 class="w-28 h-28 rounded-full object-cover border border-gray-200 mb-3 mx-auto">
+            <input type="file" name="profileImage" class="form-input" accept="image/jpeg,image/png,image/webp,image/gif">
+            <p class="text-gray-400 text-sm mt-2">JPEG أو PNG أو WEBP أو GIF بحد أقصى 1 ميجابايت.</p>
+        </div>
+        <div class="form-group">
+            <label class="form-label">الاسم الكامل</label>
+            <input type="text" name="fullName" value="<%= admin.fullName %>" class="form-input" minlength="3" maxlength="100" required>
+        </div>
+        <div class="form-group">
+            <label class="form-label">البريد الإلكتروني</label>
+            <input type="email" name="email" value="<%= admin.email %>" class="form-input" required>
+        </div>
+        <div class="form-group">
+            <label class="form-label">نبذة</label>
+            <textarea name="bio" rows="6" maxlength="1000" class="form-input resize-none"><%= admin.bio || '' %></textarea>
+        </div>
+        <button type="submit" class="btn-primary">
+            <i class="fas fa-save"></i> حفظ البيانات
+        </button>
+    </form>
+</div>
+
+   </main>
+        </div>
+    </div>
+
+    <script src="/js/admin.js"></script>
+</body>
+</html>

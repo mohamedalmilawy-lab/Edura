@@ -32,10 +32,32 @@ const parseIsActive = (value) => {
   return values.includes('on') || values.includes('true') || value === true;
 };
 
+const parseExpiresAt = (value) => {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const isExpired = (expiresAt) => expiresAt && new Date(expiresAt).getTime() <= Date.now();
+
+async function deactivateExpiredBanners() {
+  await Banner.updateMany(
+    { isActive: true, expiresAt: { $ne: null, $lte: new Date() } },
+    { $set: { isActive: false } }
+  );
+}
+
+const getEffectiveIsActive = (requestedIsActive, expiresAt) =>
+  requestedIsActive && !isExpired(expiresAt);
+
 // GET /api/banners - Public: active banners
 exports.listActiveBanners = async (req, res) => {
   try {
-    const banners = await Banner.find({ isActive: true }).sort({ createdAt: -1 });
+    await deactivateExpiredBanners();
+    const banners = await Banner.find({
+      isActive: true,
+      $or: [{ expiresAt: null }, { expiresAt: { $gt: new Date() } }]
+    }).sort({ createdAt: -1 });
     return ApiResponse.ok(res, 'تم جلب اللافتات الإعلانية بنجاح', banners);
   } catch (error) {
     console.error('List banners error:', error);
@@ -46,6 +68,7 @@ exports.listActiveBanners = async (req, res) => {
 // GET /api/banners/:id - Public: banner details with linked courses/categories
 exports.getBanner = async (req, res) => {
   try {
+    await deactivateExpiredBanners();
     const banner = await Banner.findById(req.params.id);
     if (!banner || !banner.isActive) {
       return ApiResponse.notFound(res, 'اللافتة الإعلانية غير موجودة');
@@ -65,6 +88,7 @@ exports.getBanner = async (req, res) => {
 // Admin: Get banners page
 exports.getAdminBanners = async (req, res) => {
   try {
+    await deactivateExpiredBanners();
     const banners = await Banner.find().sort({ createdAt: -1 });
     const courses = await Course.find().select('title').sort({ title: 1 });
     const categories = await Category.find().select('name').sort({ name: 1 });
@@ -102,13 +126,16 @@ exports.createBanner = async (req, res) => {
     }
 
     const link = normalizeLink(req.body.link, linkType);
+    const expiresAt = parseExpiresAt(req.body.expiresAt);
 
     await Banner.create({
       title,
+      description: typeof req.body.description === 'string' ? req.body.description.trim() : '',
       linkType: linkType || 'Non',
       link,
       imageUrl,
-      isActive: parseIsActive(req.body.isActive)
+      expiresAt,
+      isActive: getEffectiveIsActive(parseIsActive(req.body.isActive), expiresAt)
     });
 
     req.flash('success_msg', 'تم إضافة اللافتة بنجاح');
@@ -133,11 +160,24 @@ exports.updateBanner = async (req, res) => {
     const update = {};
 
     if (title !== undefined) update.title = title;
+    if (req.body.description !== undefined) {
+      update.description = typeof req.body.description === 'string'
+        ? req.body.description.trim()
+        : '';
+    }
     if (linkType !== undefined) update.linkType = linkType;
     if (req.body.link !== undefined || linkType !== undefined) {
       update.link = normalizeLink(req.body.link, linkType !== undefined ? linkType : banner.linkType);
     }
-    if (req.body.isActive !== undefined) update.isActive = parseIsActive(req.body.isActive);
+    if (req.body.expiresAt !== undefined) {
+      update.expiresAt = parseExpiresAt(req.body.expiresAt);
+    }
+    if (req.body.isActive !== undefined) {
+      const expiresAt = update.expiresAt !== undefined ? update.expiresAt : banner.expiresAt;
+      update.isActive = getEffectiveIsActive(parseIsActive(req.body.isActive), expiresAt);
+    } else if (update.expiresAt !== undefined && isExpired(update.expiresAt)) {
+      update.isActive = false;
+    }
 
     if (req.file) {
       update.imageUrl = '/uploads/' + req.file.filename;

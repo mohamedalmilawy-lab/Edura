@@ -4,6 +4,7 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const methodOverride = require('method-override');
 const path = require('path');
+const multer = require('multer');
 
 const connectDB = require('./config/db');
 const { setUser } = require('./middleware/auth');
@@ -133,6 +134,19 @@ app.use((req, res) => {
 // Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
+  if (err instanceof multer.MulterError || err.code === 'LIMIT_FILE_SIZE') {
+    if (req.path.startsWith('/api')) {
+      return ApiResponse.badRequest(res, err.code === 'LIMIT_FILE_SIZE'
+        ? 'حجم الصورة يجب ألا يتجاوز 1 ميجابايت'
+        : 'تعذر رفع الملف');
+    }
+  }
+  if (err.message === 'Only image files are allowed (jpeg, jpg, png, webp, gif)' ||
+      err.message === 'يسمح برفع صور فقط') {
+    if (req.path.startsWith('/api')) {
+      return ApiResponse.badRequest(res, 'نوع الملف غير مدعوم. يسمح بصور JPEG أو PNG أو WEBP أو GIF');
+    }
+  }
   const message = process.env.NODE_ENV === 'development' ? err.message : 'حدث خطأ ما';
   if (req.path.startsWith('/api')) {
     return ApiResponse.serverError(res, message);

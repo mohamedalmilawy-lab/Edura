@@ -39,6 +39,7 @@ const setUser = (req, res, next) => {
     id: req.session.userId,
     fullName: req.session.userName,
     email: req.session.userEmail,
+    profileImage: req.session.userProfileImage || '/images/default-avatar.svg',
     role: req.session.userRole,
     walletBalance: req.session.walletBalance || 0
   } : null;

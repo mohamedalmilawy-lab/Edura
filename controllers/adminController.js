@@ -5,6 +5,7 @@ const Category = require('../models/Category');
 const Transaction = require('../models/Transaction');
 const Contact = require('../models/Contact');
 const Comment = require('../models/Comment');
+const Banner = require('../models/Banner');
 
 // GET /admin/dashboard - Admin dashboard overview
 exports.getDashboard = async (req, res) => {
@@ -55,6 +56,10 @@ exports.getDashboard = async (req, res) => {
     // Get recent stats
     const recentContacts = await Contact.countDocuments();
     const recentComments = await Comment.countDocuments();
+    const totalTeachers = await User.countDocuments({ role: 'teacher' });
+    const totalBanners = await Banner.countDocuments();
+    const activeBanners = await Banner.countDocuments({ isActive: true });
+    const admin = await User.findById(req.session.userId).select('-password');
 
     res.render('pages/admin/dashboard', {
       title: 'لوحة التحكم',
@@ -64,10 +69,14 @@ exports.getDashboard = async (req, res) => {
         totalOrders,
         revenue,
         recentContacts,
-        recentComments
+        recentComments,
+        totalTeachers,
+        totalBanners,
+        activeBanners
       },
       latestOrders,
       categoryStats,
+      admin,
       layouts: 'admin'
     });
   } catch (error) {

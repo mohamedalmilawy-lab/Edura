@@ -33,6 +33,17 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  profileImage: {
+    type: String,
+    default: '/images/default-avatar.svg',
+    trim: true
+  },
+  bio: {
+    type: String,
+    default: '',
+    trim: true,
+    maxlength: [1000, 'النبذة يجب ألا تتجاوز 1000 حرف']
+  },
   joinedAt: {
     type: Date,
     default: Date.now

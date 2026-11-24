@@ -1,5 +1,25 @@
 const Joi = require('joi');
 const ApiResponse = require('../utils/ApiResponse');
+const fs = require('fs');
+
+function deleteTemporaryUploads(req) {
+  const files = [];
+  if (req.file) files.push(req.file);
+  if (req.files) {
+    if (Array.isArray(req.files)) files.push(...req.files);
+    else Object.values(req.files).forEach((group) => files.push(...group));
+  }
+
+  files.forEach((file) => {
+    if (file?.path && fs.existsSync(file.path)) {
+      try {
+        fs.unlinkSync(file.path);
+      } catch (error) {
+        console.error('Delete temporary upload error:', error);
+      }
+    }
+  });
+}
 
 const stripSensitiveData = (body) => Object.keys(body).reduce((acc, key) => {
   if (/password|confirm|current/i.test(key)) return acc;
@@ -24,6 +44,7 @@ const sendValidationError = (req, res, error, oldData) => {
   req.session.errors = errorMessages;
   req.session.errorFields = errorFields;
   req.session.oldData = oldData || stripSensitiveData(req.body);
+  deleteTemporaryUploads(req);
 
   const wantsJson = req.xhr
     || req.originalUrl?.startsWith('/api')

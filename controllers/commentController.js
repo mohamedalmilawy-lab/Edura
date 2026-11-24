@@ -9,7 +9,19 @@ exports.getComments = async (req, res) => {
       .populate('user', 'fullName')
       .sort({ createdAt: -1 });
 
-    return ApiResponse.ok(res, 'تم جلب التعليقات بنجاح', { comments });
+    const ratingSummary = (await Comment.getRatingSummaries([req.params.courseId]))[req.params.courseId] || {
+      averageRating: 0,
+      ratingCount: 0
+    };
+    let userRating = null;
+    if (req.user) {
+      userRating = await Comment.findOne({
+        course: req.params.courseId,
+        user: req.user.id
+      }).select('rating text');
+    }
+
+    return ApiResponse.ok(res, 'تم جلب التعليقات بنجاح', { comments, ratingSummary, userRating });
   } catch (error) {
     console.error('Get comments error:', error);
     return ApiResponse.serverError(res, 'حدث خطأ أثناء تحميل التعليقات');
@@ -19,7 +31,7 @@ exports.getComments = async (req, res) => {
 // POST /api/comments/:courseId - Add comment to a course
 exports.addComment = async (req, res) => {
   try {
-    const { text } = req.body;
+    const { text, rating } = req.body;
     const { courseId } = req.params;
     const userId = req.user.id;
 
@@ -33,16 +45,26 @@ exports.addComment = async (req, res) => {
       return ApiResponse.notFound(res, 'الكورس غير موجود');
     }
 
-    const comment = await Comment.create({
-      user: userId,
-      course: courseId,
-      text: text.trim()
-    });
+    const comment = await Comment.findOneAndUpdate(
+      { user: userId, course: courseId },
+      {
+        $set: {
+          text: text.trim(),
+          rating: Number(rating),
+          createdAt: new Date()
+        }
+      },
+      { new: true, upsert: true, runValidators: true, setDefaultsOnInsert: true }
+    );
 
-    // Populate user data
     await comment.populate('user', 'fullName');
 
-    return ApiResponse.created(res, 'تم إضافة التعليق بنجاح', { comment });
+    const ratingSummary = (await Comment.getRatingSummaries([courseId]))[courseId] || {
+      averageRating: 0,
+      ratingCount: 0
+    };
+
+    return ApiResponse.created(res, 'تم حفظ تقييم الكورس بنجاح', { comment, ratingSummary });
   } catch (error) {
     console.error('Add comment error:', error);
     return ApiResponse.serverError(res, 'حدث خطأ أثناء إضافة التعليق');

@@ -12,6 +12,7 @@
                     <th>المستخدم</th>
                     <th>الكورس</th>
                     <th>التعليق</th>
+                    <th>التقييم</th>
                     <th>التاريخ</th>
                     <th>التحكم</th>
                 </tr>
@@ -27,6 +28,14 @@
                         </td>
                         <td><%= comment.course ? comment.course.title : 'محذوف' %></td>
                         <td class="text-gray-600 text-sm max-w-md truncate"><%= comment.text %></td>
+                        <td>
+                            <% if (comment.rating) { %>
+                                <span class="font-bold text-yellow-500"><%= comment.rating %>/5</span>
+                                <i class="fas fa-star text-yellow-400"></i>
+                            <% } else { %>
+                                <span class="text-gray-400">-</span>
+                            <% } %>
+                        </td>
                         <td class="text-gray-400 text-sm"><%= new Date(comment.createdAt).toLocaleDateString('ar-SA') %></td>
                         <td>
                             <form action="/admin/comments/<%= comment._id %>?_method=DELETE" method="POST" class="inline">
@@ -39,7 +48,7 @@
                 <% }); %>
                 <% if (comments.length === 0) { %>
                     <tr>
-                        <td colspan="5" class="text-center text-gray-400 py-8">لا توجد تعليقات</td>
+                        <td colspan="6" class="text-center text-gray-400 py-8">لا توجد تعليقات</td>
                     </tr>
                 <% } %>
             </tbody>

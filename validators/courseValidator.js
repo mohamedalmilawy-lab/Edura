@@ -37,6 +37,15 @@ const courseSchema = Joi.object({
     'date.base': 'تاريخ انتهاء العرض غير صحيح'
   }),
   videos: Joi.any().optional()
+  ,
+  removePdfs: Joi.any().optional(),
+  examTitle: Joi.string().trim().optional().allow(''),
+  questionTexts: Joi.any().optional(),
+  choiceOne: Joi.any().optional(),
+  choiceTwo: Joi.any().optional(),
+  choiceThree: Joi.any().optional(),
+  choiceFour: Joi.any().optional(),
+  correctChoices: Joi.any().optional()
 });
 
 const validateAdminCourse = validateBody(courseSchema);

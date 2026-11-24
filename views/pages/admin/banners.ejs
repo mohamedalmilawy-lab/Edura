@@ -23,8 +23,10 @@
                 <tr>
                     <th>الصورة</th>
                     <th>العنوان</th>
+                    <th>الوصف</th>
                     <th>نوع الرابط</th>
                     <th>الحالة</th>
+                    <th>تاريخ الانتهاء</th>
                     <th>التاريخ</th>
                     <th>التحكم</th>
                 </tr>
@@ -36,6 +38,7 @@
                             <img src="<%= b.imageUrl %>" alt="<%= b.title %>" class="w-16 h-10 rounded object-cover">
                         </td>
                         <td class="font-semibold"><%= b.title %></td>
+                        <td class="text-gray-500 text-sm max-w-xs truncate"><%= b.description || '-' %></td>
                         <td class="text-gray-500 text-sm">
                             <%= b.linkType === 'Course' ? 'كورس' : b.linkType === 'Category' ? 'تصنيف' : 'بدون رابط' %>
                         </td>
@@ -44,6 +47,9 @@
                                 <%= b.isActive ? 'متاحة' : 'موقوفة' %>
                             </span>
                         </td>
+                        <td class="text-gray-400 text-sm">
+                            <%= b.expiresAt ? new Date(b.expiresAt).toLocaleString('ar-SA') : 'بلا انتهاء' %>
+                        </td>
                         <td class="text-gray-400 text-sm"><%= new Date(b.createdAt).toLocaleDateString('ar-SA') %></td>
                         <td>
                             <div class="table-actions">
@@ -51,9 +57,11 @@
                                         data-edit='<%- JSON.stringify({
                                             id: b._id.toString(),
                                             title: b.title,
+                                            description: b.description,
                                             linkType: b.linkType,
                                             link: (b.link || []).map(function(l){ return l.toString(); }),
                                             isActive: b.isActive,
+                                            expiresAt: b.expiresAt ? new Date(b.expiresAt.getTime() - b.expiresAt.getTimezoneOffset() * 60000).toISOString().slice(0,16) : '',
                                             imageUrl: b.imageUrl
                                         }) %>'
                                         data-action="/admin/banners/<%= b._id %>?_method=PUT"
@@ -71,7 +79,7 @@
                 <% }); %>
                 <% if (banners.length === 0) { %>
                     <tr>
-                        <td colspan="6" class="text-center text-gray-400 py-8">لا توجد لافتات</td>
+                        <td colspan="8" class="text-center text-gray-400 py-8">لا توجد لافتات</td>
                     </tr>
                 <% } %>
             </tbody>
@@ -91,6 +99,10 @@
                 <div class="form-group">
                     <label class="form-label">عنوان اللافتة</label>
                     <input type="text" name="title" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الوصف (اختياري)</label>
+                    <textarea name="description" rows="3" maxlength="500" class="form-input resize-none"></textarea>
                 </div>
                 <div class="form-group">
                     <label class="form-label">نوع الرابط</label>
@@ -119,6 +131,10 @@
                 <div class="form-group">
                     <label class="form-label">صورة اللافتة</label>
                     <input type="file" name="image" class="form-input" accept="image/*" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">تاريخ الانتهاء (اختياري)</label>
+                    <input type="datetime-local" name="expiresAt" class="form-input">
                 </div>
                 <div class="form-group flex items-center gap-2">
                     <input type="hidden" name="isActive" value="off">
@@ -152,6 +168,10 @@
                     <input type="text" name="title" class="form-input" required>
                 </div>
                 <div class="form-group">
+                    <label class="form-label">الوصف (اختياري)</label>
+                    <textarea name="description" rows="3" maxlength="500" class="form-input resize-none"></textarea>
+                </div>
+                <div class="form-group">
                     <label class="form-label">نوع الرابط</label>
                     <select name="linkType" class="form-input link-type-select">
                         <option value="Course">كورس</option>
@@ -178,6 +198,10 @@
                 <div class="form-group">
                     <label class="form-label">صورة جديدة (اتركها فارغة للإبقاء على الحالية)</label>
                     <input type="file" name="image" class="form-input" accept="image/*">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">تاريخ الانتهاء (اختياري)</label>
+                    <input type="datetime-local" name="expiresAt" class="form-input">
                 </div>
                 <div class="form-group flex items-center gap-2">
                     <input type="hidden" name="isActive" value="off">

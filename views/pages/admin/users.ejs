@@ -48,6 +48,7 @@
                 <tr>
                     <th>المستخدم</th>
                     <th>البريد</th>
+                    <th>النبذة</th>
                     <th>الدور</th>
                     <th>المحفظة</th>
                     <th>الانضمام</th>
@@ -64,6 +65,7 @@
                             <span class="font-semibold text-sm"><%= u.fullName %></span>
                         </td>
                         <td class="text-gray-500 text-sm"><%= u.email %></td>
+                        <td class="text-gray-500 text-sm max-w-xs truncate"><%= u.bio || '-' %></td>
                         <td>
                             <select class="role-select form-input text-sm py-1" data-user-id="<%= u._id %>">
                                 <option value="student" <%= u.role === 'student' ? 'selected' : '' %>>طالب</option>
@@ -75,6 +77,12 @@
                         <td class="text-gray-400 text-sm"><%= new Date(u.joinedAt).toLocaleDateString('ar-SA') %></td>
                         <td>
                             <div class="table-actions">
+                                <button data-modal="editUserModal"
+                                        data-edit='<%- JSON.stringify({ id: u._id.toString(), fullName: u.fullName, email: u.email, bio: u.bio || '', imageUrl: u.profileImage || '/images/default-avatar.svg' }) %>'
+                                        data-action="/admin/users/<%= u._id %>/profile?_method=PUT"
+                                        class="btn-primary text-xs">
+                                    <i class="fas fa-edit"></i>
+                                </button>
                                 <button class="recharge-btn btn-success text-xs" data-user-id="<%= u._id %>" data-user-name="<%= u.fullName %>">
                                     <i class="fas fa-plus-circle"></i> شحن
                                 </button>
@@ -89,7 +97,7 @@
                 <% }); %>
                 <% if (users.length === 0) { %>
                     <tr>
-                        <td colspan="6" class="text-center text-gray-400 py-8">لا يوجد مستخدمون</td>
+                        <td colspan="7" class="text-center text-gray-400 py-8">لا يوجد مستخدمون</td>
                     </tr>
                 <% } %>
             </tbody>
@@ -138,10 +146,53 @@
                         <p class="text-red-600 text-sm mt-2"><%= errorFields.role %></p>
                     <% } %>
                 </div>
+                <div class="form-group">
+                    <label class="form-label">نبذة عن المستخدم</label>
+                    <textarea name="bio" rows="4" maxlength="1000" class="form-input resize-none"><%= typeof oldData !== 'undefined' && oldData.bio ? oldData.bio : '' %></textarea>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="modal-close btn-outline text-sm">إلغاء</button>
                 <button type="submit" class="btn-success text-sm"><i class="fas fa-plus"></i> إضافة</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit User Profile Modal -->
+<div id="editUserModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="text-lg font-bold text-primary">تعديل بيانات المستخدم</h3>
+            <button class="modal-close text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+        </div>
+        <form action="" method="POST" enctype="multipart/form-data" class="modal-form">
+            <div class="modal-body">
+                <div class="form-group current-image mb-3 hidden">
+                    <label class="form-label">الصورة الشخصية الحالية</label>
+                    <img src="" alt="" class="w-28 h-28 rounded-full object-cover border border-gray-200">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">صورة جديدة (اتركها فارغة للإبقاء على الحالية)</label>
+                    <input type="file" name="profileImage" class="form-input" accept="image/jpeg,image/png,image/webp,image/gif">
+                    <p class="text-gray-400 text-sm mt-2">JPEG أو PNG أو WEBP أو GIF بحد أقصى 1 ميجابايت.</p>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الاسم الكامل</label>
+                    <input type="text" name="fullName" class="form-input" minlength="3" maxlength="100" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">البريد الإلكتروني</label>
+                    <input type="email" name="email" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">نبذة عن المستخدم</label>
+                    <textarea name="bio" rows="4" maxlength="1000" class="form-input resize-none"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-close btn-outline text-sm">إلغاء</button>
+                <button type="submit" class="btn-primary text-sm"><i class="fas fa-save"></i> حفظ</button>
             </div>
         </form>
     </div>

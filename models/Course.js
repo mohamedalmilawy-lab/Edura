@@ -24,6 +24,37 @@ const courseSchema = new mongoose.Schema({
     type: [String],
     default: []
   },
+  pdfs: {
+    type: [{
+      title: { type: String, trim: true },
+      url: { type: String, required: true }
+    }],
+    default: []
+  },
+  exams: {
+    type: [{
+      title: { type: String, trim: true },
+      questions: {
+        type: [{
+          question: { type: String, trim: true, required: true },
+          choices: {
+            type: [String],
+            validate: {
+              validator: choices => choices.length >= 2 && choices.length <= 6,
+              message: 'يجب إدخال خيارين على الأقل'
+            }
+          },
+          correctChoice: {
+            type: Number,
+            required: true,
+            min: 0
+          }
+        }],
+        default: []
+      }
+    }],
+    default: []
+  },
   category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Category',

@@ -1,47 +1,62 @@
 <%- include('../../layouts/admin') %>
-<!-- Stats Cards -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <div class="stat-card-admin">
-        <div class="stat-icon bg-primary/10 text-primary">
-            <i class="fas fa-book"></i>
+
+<div class="mb-6 rounded-2xl bg-gradient-to-l from-primaryDark via-primary to-primaryLight p-6 text-white shadow-lg">
+    <div class="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex items-center gap-4">
+            <img src="<%= admin && admin.profileImage ? admin.profileImage : '/images/default-avatar.svg' %>"
+                 alt="<%= admin ? admin.fullName : 'المدير' %>"
+                 class="h-20 w-20 rounded-2xl object-cover ring-4 ring-white/20">
+            <div>
+                <p class="text-sm text-blue-100">لوحة الإدارة العامة</p>
+                <h2 class="mt-1 text-2xl font-bold"><%= admin ? admin.fullName : user.fullName %></h2>
+                <p class="mt-2 max-w-xl text-sm leading-6 text-blue-100">
+                    <%= admin && admin.bio ? admin.bio : 'تابع الأداء وإدارة المحتوى والمستخدمين واللافتات الإعلانية.' %>
+                </p>
+            </div>
         </div>
-        <div>
-            <p class="text-2xl font-bold text-primary"><%= stats.totalCourses %></p>
-            <p class="text-gray-500 text-sm">إجمالي الكورسات</p>
-        </div>
-    </div>
-    <div class="stat-card-admin">
-        <div class="stat-icon bg-blue-100 text-blue-600">
-            <i class="fas fa-users"></i>
-        </div>
-        <div>
-            <p class="text-2xl font-bold text-primary"><%= stats.totalUsers %></p>
-            <p class="text-gray-500 text-sm">إجمالي المستخدمين</p>
-        </div>
-    </div>
-    <div class="stat-card-admin">
-        <div class="stat-icon bg-accent/20 text-accent">
-            <i class="fas fa-shopping-bag"></i>
-        </div>
-        <div>
-            <p class="text-2xl font-bold text-primary"><%= stats.totalOrders %></p>
-            <p class="text-gray-500 text-sm">إجمالي الطلبات</p>
-        </div>
-    </div>
-    <div class="stat-card-admin">
-        <div class="stat-icon bg-green-100 text-green-600">
-            <i class="fas fa-money-bill-wave"></i>
-        </div>
-        <div>
-            <p class="text-2xl font-bold text-primary"><%= stats.revenue %> ل.س </p>
-            <p class="text-gray-500 text-sm">إجمالي الإيرادات</p>
-        </div>
+        <a href="/admin/profile" class="btn-outline shrink-0 border-white/30 bg-white/10 text-white hover:bg-white hover:text-primary">
+            <i class="fas fa-user-edit"></i> تعديل الملف
+        </a>
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-    <!-- Sales by Category Chart -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+<div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4 mb-8">
+    <a href="/admin/courses" class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-primary/30 hover:shadow-md">
+        <div class="flex items-center justify-between">
+            <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary"><i class="fas fa-book text-xl"></i></span>
+            <span class="text-3xl font-black text-primary"><%= stats.totalCourses %></span>
+        </div>
+        <h3 class="mt-5 font-bold text-primary">الكورسات</h3>
+        <p class="mt-1 text-sm text-gray-500">إجمالي الدورات في المنصة</p>
+    </a>
+    <a href="/admin/users" class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-blue-300 hover:shadow-md">
+        <div class="flex items-center justify-between">
+            <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600"><i class="fas fa-users text-xl"></i></span>
+            <span class="text-3xl font-black text-blue-600"><%= stats.totalUsers %></span>
+        </div>
+        <h3 class="mt-5 font-bold text-primary">المستخدمون</h3>
+        <p class="mt-1 text-sm text-gray-500"><%= stats.totalTeachers %> حسابات مدرسين</p>
+    </a>
+    <a href="/admin/orders" class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-accent/40 hover:shadow-md">
+        <div class="flex items-center justify-between">
+            <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/20 text-accent"><i class="fas fa-shopping-bag text-xl"></i></span>
+            <span class="text-3xl font-black text-accent"><%= stats.totalOrders %></span>
+        </div>
+        <h3 class="mt-5 font-bold text-primary">الطلبات</h3>
+        <p class="mt-1 text-sm text-gray-500"><%= stats.revenue %> ل.س إجمالي الإيرادات</p>
+    </a>
+    <a href="/admin/banners" class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-green-300 hover:shadow-md">
+        <div class="flex items-center justify-between">
+            <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 text-green-600"><i class="fas fa-image text-xl"></i></span>
+            <span class="text-3xl font-black text-green-600"><%= stats.activeBanners %></span>
+        </div>
+        <h3 class="mt-5 font-bold text-primary">اللافتات النشطة</h3>
+        <p class="mt-1 text-sm text-gray-500"><%= stats.totalBanners %> لافتات إجمالياً</p>
+    </a>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h3 class="text-lg font-bold text-primary mb-4">
             <i class="fas fa-chart-bar text-accent ml-1"></i> الكورسات المباعة حسب التصنيف
         </h3>
@@ -49,45 +64,51 @@
             <canvas id="salesChart"></canvas>
         </div>
         <% if (categoryStats.length > 0) { %>
-            <script>
-                window.categoryChartData = <%- JSON.stringify(categoryStats) %>;
-            </script>
+            <script>window.categoryChartData = <%- JSON.stringify(categoryStats) %>;</script>
         <% } else { %>
-            <div class="flex items-center justify-center h-full text-gray-400">
+            <div class="flex items-center justify-center h-48 text-gray-400">
                 <p>لا توجد بيانات كافية</p>
             </div>
         <% } %>
     </div>
 
-    <!-- Quick Stats -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h3 class="text-lg font-bold text-primary mb-4">
-            <i class="fas fa-chart-pie text-accent ml-1"></i> إحصائيات سريعة
+            <i class="fas fa-bolt text-accent ml-1"></i> إجراءات سريعة
         </h3>
-        <div class="space-y-4">
-            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
-                        <i class="fas fa-envelope text-yellow-600"></i>
-                    </div>
-                    <span class="font-semibold">رسائل التواصل</span>
-                </div>
-                <span class="text-2xl font-bold text-primary"><%= stats.recentContacts %></span>
-            </div>
-            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-                        <i class="fas fa-comments text-purple-600"></i>
-                    </div>
-                    <span class="font-semibold">التعليقات</span>
-                </div>
-                <span class="text-2xl font-bold text-primary"><%= stats.recentComments %></span>
+        <div class="space-y-3">
+            <a href="/admin/courses" class="flex items-center justify-between rounded-lg border border-gray-200 p-3 transition hover:border-primary/30 hover:bg-gray-50">
+                <span class="font-semibold text-primary"><i class="fas fa-plus ml-2 text-primary"></i> إدارة الكورسات</span>
+                <i class="fas fa-arrow-left text-xs text-gray-400"></i>
+            </a>
+            <a href="/admin/users" class="flex items-center justify-between rounded-lg border border-gray-200 p-3 transition hover:border-primary/30 hover:bg-gray-50">
+                <span class="font-semibold text-primary"><i class="fas fa-user-plus ml-2 text-blue-600"></i> إدارة المستخدمين</span>
+                <i class="fas fa-arrow-left text-xs text-gray-400"></i>
+            </a>
+            <a href="/admin/banners" class="flex items-center justify-between rounded-lg border border-gray-200 p-3 transition hover:border-primary/30 hover:bg-gray-50">
+                <span class="font-semibold text-primary"><i class="fas fa-image ml-2 text-green-600"></i> إدارة اللافتات</span>
+                <i class="fas fa-arrow-left text-xs text-gray-400"></i>
+            </a>
+            <a href="/admin/discount-codes" class="flex items-center justify-between rounded-lg border border-gray-200 p-3 transition hover:border-primary/30 hover:bg-gray-50">
+                <span class="font-semibold text-primary"><i class="fas fa-percent ml-2 text-accent"></i>اكواد الخصم</span>
+                <i class="fas fa-arrow-left text-xs text-gray-400"></i>
+            </a>
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <a href="/admin/contacts" class="rounded-lg bg-yellow-50 p-3 text-center ransition-transform duration-300 hover:scale-110">
+                    <i class="fas fa-envelope text-yellow-600"></i>
+                    <strong class="mt-1 block text-primary"><%= stats.recentContacts %></strong>
+                    <small class="text-gray-500">رسائل</small>
+                </a>
+                <a href="/admin/comments" class="rounded-lg bg-purple-50 p-3 text-center ransition-transform duration-300 hover:scale-110">
+                    <i class="fas fa-comments text-purple-600"></i>
+                    <strong class="mt-1 block text-primary"><%= stats.recentComments %></strong>
+                    <small class="text-gray-500">تعليقات</small>
+                </a>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Latest Orders -->
 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
     <div class="p-4 border-b border-gray-200 flex items-center justify-between">
         <h3 class="text-lg font-bold text-primary">
@@ -113,9 +134,8 @@
                             <td class="font-semibold text-primary"><%= order.orderNumber %></td>
                             <td><%= order.user ? order.user.fullName : 'مجهول' %></td>
                             <td>
-                                <% order.courses.forEach(function(c, i) { %>
-                                    <span class="text-xs bg-gray-100 px-2 py-1 rounded"><%= c.title %></span>
-                                    <% if (i < order.courses.length - 1) { %> <% } %>
+                                <% order.courses.forEach(function(c) { %>
+                                    <span class="text-xs bg-gray-100 px-2 py-1 rounded ml-1"><%= c.title %></span>
                                 <% }); %>
                             </td>
                             <td class="font-bold text-accent"><%= order.totalPrice %> ل.س</td>
@@ -123,14 +143,13 @@
                         </tr>
                     <% }); %>
                 <% } else { %>
-                    <tr>
-                        <td colspan="5" class="text-center text-gray-400 py-8">لا توجد طلبات بعد</td>
-                    </tr>
+                    <tr><td colspan="5" class="text-center text-gray-400 py-8">لا توجد طلبات بعد</td></tr>
                 <% } %>
             </tbody>
         </table>
     </div>
 </div>
+
    </main>
         </div>
     </div>

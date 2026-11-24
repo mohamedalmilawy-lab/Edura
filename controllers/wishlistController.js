@@ -10,7 +10,7 @@ exports.getWishlist = async (req, res) => {
         path: 'courses',
         populate: [
           { path: 'category', select: 'name' },
-          { path: 'teacher', select: 'fullName' }
+          { path: 'teacher', select: 'fullName bio profileImage' }
         ]
       });
 

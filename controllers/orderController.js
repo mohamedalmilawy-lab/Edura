@@ -16,7 +16,7 @@ exports.getOrders = async (req, res) => {
         path: 'courses',
         populate: [
           { path: 'category', select: 'name' },
-          { path: 'teacher', select: 'fullName' }
+          { path: 'teacher', select: 'fullName bio profileImage' }
         ]
       })
       .sort({ createdAt: -1 });
@@ -31,7 +31,7 @@ exports.getOrders = async (req, res) => {
 // GET /api/orders/:id - Course content (order detail)
 exports.getCourseById = async (req, res) => {
   try {
-    const course = await Course.findOne({ _id: req.params.id }).populate('category', 'name').populate('teacher', 'fullName');
+    const course = await Course.findOne({ _id: req.params.id }).populate('category', 'name').populate('teacher', 'fullName bio profileImage');
 
     if (!course) {
       return ApiResponse.notFound(res, 'الكورس غير موجود');
@@ -54,11 +54,19 @@ exports.getCourseById = async (req, res) => {
     const comments = await Comment.find({ course: course._id })
       .populate('user', 'fullName')
       .sort({ createdAt: -1 });
+    const ratingSummaries = await Comment.getRatingSummaries([course._id]);
+    const ratingSummary = ratingSummaries[course._id.toString()] || {
+      averageRating: 0,
+      ratingCount: 0
+    };
+    const ownReview = await Comment.findOne({ course: course._id, user: req.user.id }).select('rating text');
 
     return ApiResponse.ok(res, 'تم جلب محتوى الكورس بنجاح', {
       course,
       hasAccess,
-      comments
+      comments,
+      ratingSummary,
+      userRating: ownReview
     });
   } catch (error) {
     console.error('Get order detail error:', error);
@@ -205,7 +213,7 @@ exports.getAdminOrderDetail = async (req, res) => {
         path: 'courses',
         populate: [
           { path: 'category', select: 'name' },
-          { path: 'teacher', select: 'fullName' }
+          { path: 'teacher', select: 'fullName bio profileImage' }
         ]
       });
 

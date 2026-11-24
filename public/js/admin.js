@@ -1,3 +1,12 @@
+function escapeHtml(value) {
+    return String(value == null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 function convertToYouTubeEmbed(url) {
     if (!url) return null;
     const patterns = [
@@ -89,7 +98,7 @@ $(document).ready(function() {
 
         // Fill form fields
         for (const [key, value] of Object.entries(data)) {
-            if (key === 'videos') continue;
+            if (key === 'videos' || key === 'pdfs' || key === 'exams') continue;
             if (key === 'imageUrl') {
                 const $wrap = $(`#${modalId} .current-image`);
                 if (value) {
@@ -139,6 +148,63 @@ $(document).ready(function() {
             }
         }
 
+        // Handle existing PDF files
+        const pdfWrapper = $(`#${modalId} #editPdfsWrapper`);
+        if (pdfWrapper.length) {
+            pdfWrapper.empty();
+            if (data.pdfs && data.pdfs.length > 0) {
+                data.pdfs.forEach(pdf => {
+                    pdfWrapper.append(`
+                        <label class="flex items-center gap-2 mb-2">
+                            <input type="checkbox" name="removePdfs[]" value="${pdf.url}">
+                            <a href="${pdf.url}" target="_blank" class="text-accent hover:underline">${pdf.title || pdf.url}</a>
+                            <span class="text-gray-500">(حذف)</span>
+                        </label>
+                    `);
+                });
+            } else {
+                pdfWrapper.append('<span class="text-gray-500">لا توجد ملفات PDF</span>');
+            }
+        }
+
+        // Handle multiple-choice exam questions
+        const examWrapper = $(`#${modalId} #editExamsWrapper`);
+        if (examWrapper.length) {
+            examWrapper.empty();
+            $(`#${modalId} [name="examTitle"]`).val('');
+            if (data.exams && data.exams.length > 0) {
+                const exam = data.exams[0];
+                $(`#${modalId} [name="examTitle"]`).val(exam.title || '');
+                if (exam.questions && exam.questions.length > 0) {
+                    exam.questions.forEach((question, index) => {
+                        const choices = question.choices || [];
+                        examWrapper.append(`
+                            <div class="exam-question-group border border-gray-200 rounded-lg p-3 mb-3">
+                                <input type="text" name="questionTexts[]" value="${escapeHtml(question.question || '')}" class="form-input mb-2" placeholder="نص السؤال">
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="text" name="choiceOne[]" value="${escapeHtml(choices[0] || '')}" class="form-input" placeholder="الاختيار الأول">
+                                    <input type="text" name="choiceTwo[]" value="${escapeHtml(choices[1] || '')}" class="form-input" placeholder="الاختيار الثاني">
+                                    <input type="text" name="choiceThree[]" value="${escapeHtml(choices[2] || '')}" class="form-input" placeholder="الاختيار الثالث (اختياري)">
+                                    <input type="text" name="choiceFour[]" value="${escapeHtml(choices[3] || '')}" class="form-input" placeholder="الاختيار الرابع (اختياري)">
+                                </div>
+                                <select name="correctChoices[]" class="form-input mt-2">
+                                    <option value="0" ${question.correctChoice === 0 ? 'selected' : ''}>الاختيار الأول هو الصحيح</option>
+                                    <option value="1" ${question.correctChoice === 1 ? 'selected' : ''}>الاختيار الثاني هو الصحيح</option>
+                                    <option value="2" ${question.correctChoice === 2 ? 'selected' : ''}>الاختيار الثالث هو الصحيح</option>
+                                    <option value="3" ${question.correctChoice === 3 ? 'selected' : ''}>الاختيار الرابع هو الصحيح</option>
+                                </select>
+                                <button type="button" class="btn-danger remove-question-btn text-xs mt-2 px-3 rounded"><i class="fas fa-trash"></i> حذف السؤال</button>
+                            </div>
+                        `);
+                    });
+                } else {
+                    examWrapper.append(emptyQuestionTemplate());
+                }
+            } else {
+                examWrapper.append(emptyQuestionTemplate());
+            }
+        }
+
         // Update form action
         const actionUrl = $(this).data('action');
         if (actionUrl) {
@@ -164,6 +230,39 @@ $(document).ready(function() {
     $(document).on('click', '.remove-video-btn', function(e) {
         e.preventDefault();
         $(this).closest('.video-input-group').remove();
+    });
+
+    function emptyQuestionTemplate() {
+        return `
+            <div class="exam-question-group border border-gray-200 rounded-lg p-3 mb-3">
+                <input type="text" name="questionTexts[]" class="form-input mb-2" placeholder="نص السؤال">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" name="choiceOne[]" class="form-input" placeholder="الاختيار الأول">
+                    <input type="text" name="choiceTwo[]" class="form-input" placeholder="الاختيار الثاني">
+                    <input type="text" name="choiceThree[]" class="form-input" placeholder="الاختيار الثالث (اختياري)">
+                    <input type="text" name="choiceFour[]" class="form-input" placeholder="الاختيار الرابع (اختياري)">
+                </div>
+                <select name="correctChoices[]" class="form-input mt-2">
+                    <option value="0">الاختيار الأول هو الصحيح</option>
+                    <option value="1">الاختيار الثاني هو الصحيح</option>
+                    <option value="2">الاختيار الثالث هو الصحيح</option>
+                    <option value="3">الاختيار الرابع هو الصحيح</option>
+                </select>
+            </div>
+        `;
+    }
+
+    $(document).on('click', '.add-question-btn', function(e) {
+        e.preventDefault();
+        const container = $(this).closest('.form-group').find('.exam-inputs-wrapper');
+        const question = $(emptyQuestionTemplate());
+        question.append('<button type="button" class="btn-danger remove-question-btn text-xs mt-2 px-3 rounded"><i class="fas fa-trash"></i> حذف السؤال</button>');
+        container.append(question);
+    });
+
+    $(document).on('click', '.remove-question-btn', function(e) {
+        e.preventDefault();
+        $(this).closest('.exam-question-group').remove();
     });
 
     // ==========================

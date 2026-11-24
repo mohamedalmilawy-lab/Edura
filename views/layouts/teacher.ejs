@@ -38,8 +38,8 @@
         <!-- Sidebar -->
         <aside id="teacherSidebar" class="fixed inset-y-0 right-0 z-50 w-64 bg-primary text-white transform transition-transform duration-300 lg:translate-x-0 lg:static lg:inset-auto">
             <div class="flex items-center justify-between p-4 border-b border-primaryLight">
-                <a href="/admin/dashboard" class="text-xl font-bold flex items-center gap-2">
-                    <img src="/images/edura_logo_icon.svg" alt="Edura" class="w-10 h-auto rounded-full">
+                <a href="/teacher/dashboard" class="text-xl font-bold flex items-center gap-2">
+                    <img src="/images/edura_logo_icon.svg" alt="Edura" class="w-16 h-auto rounded-full">
                     <span>Edura</span>
                 </a>
                 <button id="closeSidebar" class="lg:hidden text-white hover:text-accent">
@@ -63,6 +63,10 @@
                 <a href="/teacher/discount-codes" class="sidebar-link <%= title === 'أكواد الخصم' ? 'active' : '' %>">
                     <i class="fas fa-percent w-5"></i>
                     <span>أكواد الخصم</span>
+                </a>
+                <a href="/teacher/profile" class="sidebar-link <%= title === 'الملف الشخصي' ? 'active' : '' %>">
+                    <i class="fas fa-user-circle w-5"></i>
+                    <span>الملف الشخصي</span>
                 </a>
             </nav>
 
@@ -88,9 +92,11 @@
                 <h1 class="text-xl font-bold text-primary"><%= title %></h1>
                 <div class="flex items-center gap-4">
                     <span class="text-gray-600"><%= user ? user.fullName : '' %></span>
-                    <div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center">
-                        <i class="fas fa-user"></i>
-                    </div>
+                    <a href="/teacher/profile" class="block" title="الملف الشخصي">
+                        <img src="<%= user && user.profileImage ? user.profileImage : '/images/default-avatar.svg' %>"
+                             alt="<%= user ? user.fullName : 'المدرس' %>"
+                             class="w-10 h-10 rounded-full object-cover border-2 border-primary/10">
+                    </a>
                 </div>
             </header>
 

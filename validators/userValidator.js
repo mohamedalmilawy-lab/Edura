@@ -21,6 +21,9 @@ const createUserSchema = Joi.object({
   role: Joi.string().valid('student', 'teacher', 'admin').required().messages({
     'any.only': 'الدور غير صالح',
     'any.required': 'الدور مطلوب'
+  }),
+  bio: Joi.string().trim().max(1000).allow('').optional().messages({
+    'string.max': 'النبذة يجب ألا تتجاوز 1000 حرف'
   })
 });
 
@@ -35,6 +38,9 @@ const profileSchema = Joi.object({
     'string.empty': 'البريد الإلكتروني مطلوب',
     'string.email': 'البريد الإلكتروني غير صالح',
     'any.required': 'البريد الإلكتروني مطلوب'
+  }),
+  bio: Joi.string().trim().max(1000).allow('').optional().messages({
+    'string.max': 'النبذة يجب ألا تتجاوز 1000 حرف'
   })
 });
 

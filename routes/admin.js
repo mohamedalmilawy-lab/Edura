@@ -15,14 +15,22 @@ const { validateAdminCourse } = require('../validators/courseValidator');
 const { validateCreateUser } = require('../validators/userValidator');
 const { validateCategory } = require('../validators/categoryValidator');
 const { validateDiscountCode } = require('../validators/discountCodeValidator');
+const courseUpload = upload.pdfUpload.fields([
+    { name: 'image', maxCount: 1 },
+    { name: 'pdfs', maxCount: 10 }
+]);
 
 // Dashboard
 router.get('/dashboard', isAdmin, adminController.getDashboard);
 
+// Admin profile
+router.get('/profile', isAdmin, userController.getAdminProfile);
+router.put('/profile', isAdmin, upload.single('profileImage'), userController.updateAdminProfile);
+
 // Courses CRUD
 router.get('/courses', isAdmin, courseController.getAdminCourses);
-router.post('/courses', isAdmin, upload.single('image'), validateAdminCourse, courseController.createCourse);
-router.put('/courses/:id', isAdmin, upload.single('image'), validateAdminCourse, courseController.updateCourse);
+router.post('/courses', isAdmin, courseUpload, validateAdminCourse, courseController.createCourse);
+router.put('/courses/:id', isAdmin, courseUpload, validateAdminCourse, courseController.updateCourse);
 router.delete('/courses/:id', isAdmin, courseController.deleteCourse);
 
 // Categories CRUD
@@ -40,6 +48,7 @@ router.delete('/orders/:id', isAdmin, orderController.deleteOrder);
 // Users
 router.get('/users', isAdmin, userController.getAdminUsers);
 router.post('/users', isAdmin, validateCreateUser, userController.createUser);
+router.put('/users/:id/profile', isAdmin, upload.single('profileImage'), userController.updateAdminUserProfile);
 router.put('/users/:id/role', isAdmin, userController.updateUserRole);
 router.post('/users/:id/recharge', isAdmin, userController.rechargeWallet);
 router.delete('/users/:id', isAdmin, userController.deleteUser);

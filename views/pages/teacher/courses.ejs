@@ -68,7 +68,7 @@
                         <td>
                             <div class="table-actions">
                                 <button data-modal="editCourseModal"
-                                        data-edit='<%- JSON.stringify({id: course._id.toString(), title: course.title, description: course.description, price: course.price, category: course.category ? course.category._id.toString() : '', status: course.status, videos: course.videos || [], offerPrice: course.offerPrice || '', offerEndDate: toLocalInputValue(course.offerEndDate)}) %>'
+                                        data-edit='<%- JSON.stringify({id: course._id.toString(), title: course.title, description: course.description, price: course.price, category: course.category ? course.category._id.toString() : '', status: course.status, videos: course.videos || [], pdfs: course.pdfs || [], exams: course.exams || [], offerPrice: course.offerPrice || '', offerEndDate: toLocalInputValue(course.offerEndDate)}) %>'
                                         data-action="/teacher/courses/<%= course._id %>?_method=PUT"
                                         class="btn-primary text-xs">
                                     <i class="fas fa-edit"></i>
@@ -175,6 +175,32 @@
                             </button>
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label class="form-label">ملفات PDF (حتى 10 ملفات)</label>
+                        <input type="file" name="pdfs" class="form-input" accept="application/pdf" multiple>
+                    </div>
+                    <div class="form-group" id="addExamsContainer">
+                        <label class="form-label">عنوان الاختبار</label>
+                        <input type="text" name="examTitle" class="form-input mb-3" placeholder="مثال: اختبار الوحدة الأولى">
+                        <div class="exam-inputs-wrapper">
+                            <div class="exam-question-group border border-gray-200 rounded-lg p-3 mb-3">
+                                <input type="text" name="questionTexts[]" class="form-input mb-2" placeholder="نص السؤال">
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="text" name="choiceOne[]" class="form-input" placeholder="الاختيار الأول">
+                                    <input type="text" name="choiceTwo[]" class="form-input" placeholder="الاختيار الثاني">
+                                    <input type="text" name="choiceThree[]" class="form-input" placeholder="الاختيار الثالث (اختياري)">
+                                    <input type="text" name="choiceFour[]" class="form-input" placeholder="الاختيار الرابع (اختياري)">
+                                </div>
+                                <select name="correctChoices[]" class="form-input mt-2">
+                                    <option value="0">الاختيار الأول هو الصحيح</option>
+                                    <option value="1">الاختيار الثاني هو الصحيح</option>
+                                    <option value="2">الاختيار الثالث هو الصحيح</option>
+                                    <option value="3">الاختيار الرابع هو الصحيح</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-success add-question-btn text-xs mt-2"><i class="fas fa-plus"></i> إضافة سؤال</button>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -249,6 +275,18 @@
                                 <i class="fas fa-plus"></i>
                             </button>
                         </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">ملفات PDF الحالية</label>
+                        <div id="editPdfsWrapper" class="text-sm"></div>
+                        <label class="form-label mt-3">إضافة ملفات PDF</label>
+                        <input type="file" name="pdfs" class="form-input" accept="application/pdf" multiple>
+                    </div>
+                    <div class="form-group" id="editExamsContainer">
+                        <label class="form-label">عنوان الاختبار</label>
+                        <input type="text" name="examTitle" class="form-input mb-3" placeholder="مثال: اختبار الوحدة الأولى">
+                        <div class="exam-inputs-wrapper" id="editExamsWrapper"></div>
+                        <button type="button" class="btn-success add-question-btn text-xs mt-2"><i class="fas fa-plus"></i> إضافة سؤال</button>
                     </div>
                 </div>
             </div>
