@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "seed": "node seeds/seed.js"
+    "seed": "node seeds/seed.js",
+    "backfill-course-ratings": "node scripts/backfillCourseRatings.js"
   },
   "keywords": [
     "education",

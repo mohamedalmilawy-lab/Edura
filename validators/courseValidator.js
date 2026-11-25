@@ -1,5 +1,6 @@
 const Joi = require('joi');
 const { validateBody } = require('./validationMiddleware');
+const courseLevels = require('../utils/courseLevels');
 
 const courseSchema = Joi.object({
   title: Joi.string().trim().min(3).max(200).required().messages({
@@ -13,6 +14,10 @@ const courseSchema = Joi.object({
     'string.min': 'الوصف قصير جداً',
     'string.max': 'الوصف طويل جداً',
     'any.required': 'الوصف مطلوب'
+  }),
+  level: Joi.string().valid(...courseLevels).required().messages({
+    'any.only': 'مستوى الكورس غير صحيح',
+    'any.required': 'مستوى الكورس مطلوب'
   }),
   price: Joi.number().min(0).required().messages({
     'number.base': 'السعر يجب أن يكون رقماً',

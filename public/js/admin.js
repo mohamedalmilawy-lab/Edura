@@ -380,21 +380,27 @@ $(document).ready(function() {
         rechargeUserId = $(this).data('user-id');
         $('#rechargeUserName').text($(this).data('user-name') || '');
         $('#rechargeAmount').val('');
+        $('#rechargeDescription').val('');
         openModal('rechargeModal');
     });
 
     $('#rechargeForm').submit(function(e) {
         e.preventDefault();
         const amount = parseFloat($('#rechargeAmount').val());
+        const description = $('#rechargeDescription').val().trim();
         if (!amount || amount <= 0) {
             showToast('أدخل مبلغاً صحيحاً', 'error');
+            return;
+        }
+        if (!description) {
+            showToast('أدخل وصفاً لعملية الشحن', 'error');
             return;
         }
 
         $.ajax({
             url: `/admin/users/${rechargeUserId}/recharge`,
             method: 'POST',
-            data: { amount },
+            data: { amount, description },
             success: function(response) {
                 if (response.success) {
                     showToast(response.message, 'success');
@@ -402,8 +408,7 @@ $(document).ready(function() {
                     if (response.newBalance !== undefined) {
                         $(`.recharge-btn[data-user-id="${rechargeUserId}"]`)
                             .closest('tr')
-                            .find('td')
-                            .eq(3)
+                            .find('.wallet-balance')
                             .text(`${response.newBalance} ل.س`);
                     }
                 } else {

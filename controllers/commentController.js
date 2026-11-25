@@ -59,10 +59,7 @@ exports.addComment = async (req, res) => {
 
     await comment.populate('user', 'fullName');
 
-    const ratingSummary = (await Comment.getRatingSummaries([courseId]))[courseId] || {
-      averageRating: 0,
-      ratingCount: 0
-    };
+    const ratingSummary = await Comment.syncCourseRating(courseId);
 
     return ApiResponse.created(res, 'تم حفظ تقييم الكورس بنجاح', { comment, ratingSummary });
   } catch (error) {
@@ -94,7 +91,10 @@ exports.getAdminComments = async (req, res) => {
 // Admin: Delete comment
 exports.deleteComment = async (req, res) => {
   try {
-    await Comment.findByIdAndDelete(req.params.id);
+    const comment = await Comment.findByIdAndDelete(req.params.id);
+    if (comment) {
+      await Comment.syncCourseRating(comment.course);
+    }
     req.flash('success_msg', 'تم حذف التعليق بنجاح');
     res.redirect('/admin/comments');
   } catch (error) {

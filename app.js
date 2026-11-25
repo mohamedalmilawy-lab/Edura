@@ -109,8 +109,8 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/banners', bannerRoutes);
 
 // API root
-app.get('/api', (req, res) => ApiResponse.ok(res, 'Edura API', {
-  name: 'Edura API',
+app.get('/api', (req, res) => ApiResponse.ok(res, 'Edura', {
+  name: 'Edura',
   version: '1.0.0'
 }));
 

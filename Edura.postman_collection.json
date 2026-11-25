@@ -488,7 +488,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/courses?search=&category=&minPrice=&maxPrice=&page=1",
+              "raw": "{{baseUrl}}/api/courses?search=&category=&level=&minRating=&minPrice=&maxPrice=&sort=newest&page=1",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -506,6 +506,14 @@
                   "value": ""
                 },
                 {
+                  "key": "level",
+                  "value": ""
+                },
+                {
+                  "key": "minRating",
+                  "value": ""
+                },
+                {
                   "key": "minPrice",
                   "value": ""
                 },
@@ -514,12 +522,16 @@
                   "value": ""
                 },
                 {
+                  "key": "sort",
+                  "value": "newest"
+                },
+                {
                   "key": "page",
                   "value": "1"
                 }
               ]
             },
-            "description": "يدعم الفلترة والبحث والصفحات. التوثيق اختياري (لتعبئة حالة السلة/المفضلة)."
+            "description": "يدعم الفلترة حسب التصنيف والمستوى والحد الأدنى للتقييم والسعر، والبحث والصفحات والترتيب. القيم المتاحة للترتيب: highest_rating، newest، lowest_price، highest_price، most_sold. التوثيق اختياري (لتعبئة حالة السلة/المفضلة)."
           }
         },
         {

@@ -5,6 +5,7 @@ const User = require('../models/User');
 const Cart = require('../models/Cart');
 const Wishlist = require('../models/Wishlist');
 const Order = require('../models/Order');
+const courseLevels = require('../utils/courseLevels');
 const fs = require('fs');
 const path = require('path');
 const ApiResponse = require('../utils/ApiResponse');
@@ -190,8 +191,43 @@ exports.getRecommendedCourses = async (req, res) => {
 // GET /api/courses - List all courses with filters
 exports.getAllCourses = async (req, res) => {
   try {
-    const { search, category, minPrice, maxPrice, page = 1, limit = 8 } = req.query;
-    const skip = (parseInt(page) - 1) * limit;
+    const { search, category, level, minRating, minPrice, maxPrice } = req.query;
+    const sort = req.query.sort || req.query.sortBy || 'newest';
+    const page = req.query.page === undefined ? 1 : Number(req.query.page);
+    const requestedLimit = req.query.limit === undefined ? 8 : Number(req.query.limit);
+    if (!Number.isInteger(page) || page < 1 ||
+        !Number.isInteger(requestedLimit) || requestedLimit < 1) {
+      return ApiResponse.badRequest(res, 'رقم الصفحة وعدد النتائج يجب أن يكونا أعداداً صحيحة موجبة');
+    }
+    const limit = Math.min(requestedLimit, 50);
+    if (level && (typeof level !== 'string' || !courseLevels.includes(level))) {
+      return ApiResponse.badRequest(res, 'مستوى الكورس غير صحيح');
+    }
+    const hasMinimumRating = minRating !== undefined && minRating !== '';
+    const minimumRating = Number(minRating);
+    if (hasMinimumRating && (
+      typeof minRating !== 'string' ||
+      !Number.isFinite(minimumRating) ||
+      minimumRating < 1 ||
+      minimumRating > 5
+    )) {
+      return ApiResponse.badRequest(res, 'الحد الأدنى للتقييم يجب أن يكون رقماً بين 1 و5');
+    }
+    const normalizedSort = typeof sort === 'string'
+      ? sort.trim().toLowerCase().replace(/[\s-]+/g, '_')
+      : '';
+    const sortOptions = {
+      top_rated: { rating: -1, createdAt: -1, _id: 1 },
+      priceasc: { price: 1, createdAt: -1, _id: 1 },
+      pricedesc: { price: -1, createdAt: -1, _id: 1 },
+      mostsold: { enrolledCount: -1, createdAt: -1, _id: 1 },
+      newest: { createdAt: -1, _id: 1 },
+    };
+    if (!sortOptions[normalizedSort]) {
+      return ApiResponse.badRequest(res, 'خيارات الترتيب المتاحة هي: top_rated, newest, priceasc, pricedesc, mostsold');
+    }
+    const sortQuery = sortOptions[normalizedSort];
+    const skip = (page - 1) * limit;
 
     // Build query
     const query = { status: 'available' };
@@ -207,6 +243,15 @@ exports.getAllCourses = async (req, res) => {
       query.category = category;
     }
 
+    if (level) {
+      query.level = level;
+    }
+
+    if (hasMinimumRating) {
+      const courseIds = await Comment.getCourseIdsWithMinimumRating(minimumRating);
+      query._id = { $in: courseIds };
+    }
+
     if (minPrice || maxPrice) {
       query.price = {};
       if (minPrice) query.price.$gte = parseFloat(minPrice);
@@ -217,7 +262,7 @@ exports.getAllCourses = async (req, res) => {
     const courses = await Course.find(query)
       .populate('category', 'name')
       .populate('teacher', 'fullName bio profileImage')
-      .sort({ createdAt: -1, _id: 1 })
+      .sort(sortQuery)
       .skip(skip)
       .limit(limit);
 
@@ -256,6 +301,7 @@ exports.getAllCourses = async (req, res) => {
     return ApiResponse.ok(res, 'تم جلب الكورسات بنجاح', {
       courses,
       categories,
+      levels: courseLevels,
       commentsByCourse,
       ratingSummaries,
       cartCourseIds,
@@ -263,8 +309,11 @@ exports.getAllCourses = async (req, res) => {
       filters: {
         search: search || '',
         category: category || '',
+        level: level || '',
+        minRating: hasMinimumRating ? minRating : '',
         minPrice: minPrice || '',
-        maxPrice: maxPrice || ''
+        maxPrice: maxPrice || '',
+        sort: normalizedSort
       },
       pagination: {
         currentPage: parseInt(page),
@@ -426,6 +475,7 @@ exports.getAdminCourses = async (req, res) => {
       .populate('category', 'name')
       .populate('teacher', 'fullName bio profileImage')
       .sort({ createdAt: -1 });
+    const ratingSummaries = await Comment.getRatingSummaries(courses.map(course => course._id));
 
     const categories = await Category.find();
     const teachers = await User.find({ role: { $in: ['teacher', 'admin'] } });
@@ -433,6 +483,7 @@ exports.getAdminCourses = async (req, res) => {
     res.render('pages/admin/courses', {
       title: 'إدارة الكورسات',
       courses,
+      ratingSummaries,
       categories,
       teachers,
       layouts: 'admin'
@@ -447,13 +498,14 @@ exports.getAdminCourses = async (req, res) => {
 // Admin: Create course
 exports.createCourse = async (req, res) => {
   try {
-    const { title, description, price, category, teacher, status, videos } = req.body;
+    const { title, description, level, price, category, teacher, status, videos } = req.body;
     const offer = parseOfferFields(req.body);
     const uploadedImage = getUploadedImage(req);
 
     const courseData = {
       title,
       description,
+      level,
       price: parseFloat(price),
       category,
       teacher,
@@ -491,7 +543,7 @@ exports.createCourse = async (req, res) => {
 // Admin: Update course
 exports.updateCourse = async (req, res) => {
   try {
-    const { title, description, price, category, teacher, status, videos } = req.body;
+    const { title, description, level, price, category, teacher, status, videos } = req.body;
     const course = await Course.findById(req.params.id);
     const uploadedImage = getUploadedImage(req);
 
@@ -502,6 +554,7 @@ exports.updateCourse = async (req, res) => {
 
     course.title = title;
     course.description = description;
+    course.level = level;
     course.price = parseFloat(price);
     course.category = category;
     course.teacher = teacher;
@@ -602,12 +655,14 @@ exports.getTeacherCourses = async (req, res) => {
     const courses = await Course.find(query)
       .populate('category', 'name')
       .sort({ createdAt: -1 });
+    const ratingSummaries = await Comment.getRatingSummaries(courses.map(course => course._id));
 
     const categories = await Category.find();
 
     res.render('pages/teacher/courses', {
       title: 'كورساتي',
       courses,
+      ratingSummaries,
       categories,
       layouts: 'teacher'
     });
@@ -621,13 +676,14 @@ exports.getTeacherCourses = async (req, res) => {
 // Teacher: Create course
 exports.createTeacherCourse = async (req, res) => {
   try {
-    const { title, description, price, category, status, videos } = req.body;
+    const { title, description, level, price, category, status, videos } = req.body;
     const offer = parseOfferFields(req.body);
     const uploadedImage = getUploadedImage(req);
     
     const courseData = {
       title,
       description,
+      level,
       price: parseFloat(price),
       category,
       teacher: req.session.userId,
@@ -665,7 +721,7 @@ exports.createTeacherCourse = async (req, res) => {
 // Teacher: Update own course
 exports.updateTeacherCourse = async (req, res) => {
   try {
-    const { title, description, price, category, status, videos } = req.body;
+    const { title, description, level, price, category, status, videos } = req.body;
     const offer = parseOfferFields(req.body);
     const uploadedImage = getUploadedImage(req);
     const course = await Course.findOne({
@@ -680,6 +736,7 @@ exports.updateTeacherCourse = async (req, res) => {
 
     course.title = title;
     course.description = description;
+    course.level = level;
     course.price = parseFloat(price);
     course.category = category;
     course.offerPrice = offer.offerPrice;

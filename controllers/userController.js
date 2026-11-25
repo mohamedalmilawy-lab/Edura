@@ -33,6 +33,20 @@ function deleteUploadedProfileImage(imageUrl) {
   }
 }
 
+// GET /api/users/teachers
+exports.getTeachers = async (req, res) => {
+  try {
+    const teachers = await User.find({ role: 'teacher' })
+      .select('fullName profileImage bio joinedAt')
+      .sort({ fullName: 1 });
+
+    return ApiResponse.ok(res, 'تم جلب المدرسين بنجاح', { teachers });
+  } catch (error) {
+    console.error('Get teachers error:', error);
+    return ApiResponse.serverError(res, 'حدث خطأ أثناء تحميل المدرسين');
+  }
+};
+
 // GET /api/users/profile
 exports.getProfile = async (req, res) => {
   try {
@@ -419,11 +433,17 @@ exports.updateUserRole = async (req, res) => {
 // Admin: Recharge wallet
 exports.rechargeWallet = async (req, res) => {
   try {
-    const { amount } = req.body;
+    const amount = Number(req.body.amount);
+    const description = typeof req.body.description === 'string'
+      ? req.body.description.trim()
+      : '';
     const userId = req.params.id;
 
-    if (!amount || amount <= 0) {
+    if (!Number.isFinite(amount) || amount <= 0) {
       return res.status(400).json({ success: false, message: 'المبلغ غير صالح' });
+    }
+    if (!description || description.length > 500) {
+      return res.status(400).json({ success: false, message: 'وصف الشحن مطلوب ويجب ألا يتجاوز 500 حرف' });
     }
 
     const user = await User.findById(userId);
@@ -438,8 +458,8 @@ exports.rechargeWallet = async (req, res) => {
     await Transaction.create({
       user: userId,
       type: 'recharge',
-      amount: parseFloat(amount),
-      description: 'شحن رصيد من قبل الإدارة'
+      amount,
+      description
     });
 
     res.json({ success: true, message: `تم شحن ${amount} ل.س بنجاح`, newBalance: user.walletBalance });

@@ -5,6 +5,7 @@ const userController = require('../controllers/userController');
 const { validateUserProfile, validatePasswordChange } = require('../validators/userValidator');
 const upload = require('../middleware/upload');
 
+router.get('/teachers', userController.getTeachers);
 router.get('/profile', protect, userController.getProfile);
 router.put('/profile', protect,
   upload.fields([

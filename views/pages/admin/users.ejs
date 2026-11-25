@@ -73,7 +73,7 @@
                                 <option value="admin" <%= u.role === 'admin' ? 'selected' : '' %>>مدير</option>
                             </select>
                         </td>
-                        <td class="font-bold text-accent"><%= u.walletBalance %> ل.س</td>
+                        <td class="wallet-balance font-bold text-accent"><%= u.walletBalance %> ل.س</td>
                         <td class="text-gray-400 text-sm"><%= new Date(u.joinedAt).toLocaleDateString('ar-SA') %></td>
                         <td>
                             <div class="table-actions">
@@ -211,6 +211,10 @@
                 <div class="form-group">
                     <label class="form-label">المبلغ (ل.س)</label>
                     <input type="number" name="amount" id="rechargeAmount" class="form-input" min="1" step="any" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">وصف الشحن</label>
+                    <textarea name="description" id="rechargeDescription" rows="3" maxlength="500" class="form-input resize-none" required></textarea>
                 </div>
             </div>
             <div class="modal-footer">

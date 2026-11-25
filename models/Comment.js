@@ -31,7 +31,12 @@ const commentSchema = new mongoose.Schema({
 commentSchema.index({ user: 1, course: 1 }, { unique: true });
 
 commentSchema.statics.getRatingSummaries = async function(courseIds) {
-  const ids = courseIds.map(id => id._id ? id._id : id).filter(Boolean);
+  const ids = courseIds
+    .map(id => id._id ? id._id : id)
+    .filter(Boolean)
+    .map(id => typeof id === 'string' && mongoose.isValidObjectId(id)
+      ? new mongoose.Types.ObjectId(id)
+      : id);
   if (ids.length === 0) return {};
 
   const rows = await this.aggregate([
@@ -57,6 +62,44 @@ commentSchema.statics.getRatingSummaries = async function(courseIds) {
     };
     return summaries;
   }, {});
+};
+
+commentSchema.statics.getCourseIdsWithMinimumRating = async function(minimumRating) {
+  const rows = await this.aggregate([
+    {
+      $match: {
+        rating: { $gte: 1, $lte: 5 }
+      }
+    },
+    {
+      $group: {
+        _id: '$course',
+        averageRating: { $avg: '$rating' }
+      }
+    },
+    {
+      $match: {
+        averageRating: { $gte: minimumRating }
+      }
+    },
+    {
+      $project: { _id: 1 }
+    }
+  ]);
+
+  return rows.map(row => row._id);
+};
+
+commentSchema.statics.syncCourseRating = async function(courseId) {
+  const summaries = await this.getRatingSummaries([courseId]);
+  const ratingSummary = summaries[courseId.toString()] || { averageRating: 0, ratingCount: 0 };
+
+  await mongoose.model('Course').updateOne(
+    { _id: courseId },
+    { $set: { rating: ratingSummary.averageRating } }
+  );
+
+  return ratingSummary;
 };
 
 module.exports = mongoose.model('Comment', commentSchema);

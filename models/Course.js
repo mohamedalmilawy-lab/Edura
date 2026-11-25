@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const courseLevels = require('../utils/courseLevels');
 
 const courseSchema = new mongoose.Schema({
   title: {
@@ -10,6 +11,11 @@ const courseSchema = new mongoose.Schema({
     type: String,
     required: [true, 'وصف الكورس مطلوب'],
     trim: true
+  },
+  level: {
+    type: String,
+    enum: courseLevels,
+    required: [true, 'مستوى الكورس مطلوب']
   },
   price: {
     type: Number,
@@ -69,6 +75,12 @@ const courseSchema = new mongoose.Schema({
     type: String,
     enum: ['available', 'unavailable'],
     default: 'available'
+  },
+  rating: {
+    type: Number,
+    min: 0,
+    max: 5,
+    default: 0
   },
   enrolledCount: {
     type: Number,

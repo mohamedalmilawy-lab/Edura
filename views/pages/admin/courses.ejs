@@ -44,6 +44,8 @@
                 <tr>
                     <th>الكورس</th>
                     <th>التصنيف</th>
+                    <th>المستوى</th>
+                    <th>تقييم الطلاب</th>
                     <th>المدرس</th>
                     <th>السعر</th>
                     <th>الحالة</th>
@@ -59,6 +61,9 @@
                             <span class="font-semibold text-sm"><%= course.title %></span>
                         </td>
                         <td><%= course.category ? course.category.name : '-' %></td>
+                        <td><%= course.level || '-' %></td>
+                        <% const ratingSummary = ratingSummaries[course._id.toString()] || { averageRating: 0, ratingCount: 0 }; %>
+                        <td><%= ratingSummary.ratingCount ? `${ratingSummary.averageRating} / 5 (${ratingSummary.ratingCount})` : 'لا توجد تقييمات' %></td>
                         <td><%= course.teacher ? course.teacher.fullName : '-' %></td>
                         <td class="font-bold text-accent">
                         <% if (course.hasActiveOffer) { %>
@@ -78,7 +83,7 @@
                         <td>
                             <div class="table-actions">
                                 <button data-modal="editCourseModal"
-                                        data-edit='<%- JSON.stringify({id: course._id.toString(), title: course.title, description: course.description, price: course.price, category: course.category ? course.category._id.toString() : '', teacher: course.teacher ? course.teacher._id.toString() : '', status: course.status, videos: course.videos || [], pdfs: course.pdfs || [], exams: course.exams || [], offerPrice: course.offerPrice || '', offerEndDate: toLocalInputValue(course.offerEndDate)}) %>'
+                                        data-edit='<%- JSON.stringify({id: course._id.toString(), title: course.title, description: course.description, level: course.level || '', price: course.price, category: course.category ? course.category._id.toString() : '', teacher: course.teacher ? course.teacher._id.toString() : '', status: course.status, videos: course.videos || [], pdfs: course.pdfs || [], exams: course.exams || [], offerPrice: course.offerPrice || '', offerEndDate: toLocalInputValue(course.offerEndDate)}) %>'
                                         data-action="/admin/courses/<%= course._id %>?_method=PUT"
                                         class="btn-primary text-xs">
                                     <i class="fas fa-edit"></i>
@@ -94,7 +99,7 @@
                 <% }); %>
                 <% if (courses.length === 0) { %>
                     <tr>
-                        <td colspan="7" class="text-center text-gray-400 py-8">لا توجد كورسات</td>
+                        <td colspan="9" class="text-center text-gray-400 py-8">لا توجد كورسات</td>
                     </tr>
                 <% } %>
             </tbody>
@@ -145,6 +150,18 @@
                             <p class="text-red-600 text-sm mt-2"><%= errorFields.status %></p>
                         <% } %>
                     </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">مستوى الدورة</label>
+                    <select name="level" class="form-input" required>
+                        <option value="">اختر مستوى الدورة</option>
+                        <option value="مبتدئ" <%= typeof oldData !== 'undefined' && oldData.level === 'مبتدئ' ? 'selected' : '' %>>مبتدئ</option>
+                        <option value="متوسط" <%= typeof oldData !== 'undefined' && oldData.level === 'متوسط' ? 'selected' : '' %>>متوسط</option>
+                        <option value="متقدم" <%= typeof oldData !== 'undefined' && oldData.level === 'متقدم' ? 'selected' : '' %>>متقدم</option>
+                    </select>
+                    <% if (errorFields && errorFields.level) { %>
+                        <p class="text-red-600 text-sm mt-2"><%= errorFields.level %></p>
+                    <% } %>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="form-group">
@@ -268,6 +285,15 @@
                             <option value="unavailable">غير متاح</option>
                         </select>
                     </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">مستوى الدورة</label>
+                    <select name="level" class="form-input" required>
+                        <option value="">اختر مستوى الدورة</option>
+                        <option value="مبتدئ">مبتدئ</option>
+                        <option value="متوسط">متوسط</option>
+                        <option value="متقدم">متقدم</option>
+                    </select>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="form-group">
